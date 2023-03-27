@@ -1,0 +1,243 @@
+#include <Beryllium/Platforms/Windows/WindowsWindow.hpp>
+#include <Beryllium/Logger.hpp>
+
+#include <stdexcept>
+#include <Beryllium/Events/CommonEvents.hpp>
+
+namespace Beryllium
+{
+	WindowsWindow::WindowsWindow(const std::string& _title, unsigned int _width, unsigned int _height)
+		: Beryllium::Window(_title, _width, _height)
+	{
+		::tagWNDCLASSEXA wcex;
+
+		::ZeroMemory(&wcex, sizeof(wcex));
+		wcex.cbSize = sizeof(wcex);
+		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+		wcex.lpfnWndProc = WindowsWindow::WndProc;
+		wcex.hInstance = ::GetModuleHandleA(nullptr);
+		wcex.hIcon = ::LoadIconA(nullptr, (::LPCSTR)IDI_APPLICATION);
+		wcex.hCursor = ::LoadCursorA(nullptr, (::LPCSTR)IDC_ARROW);
+		wcex.hbrBackground = (::HBRUSH)(COLOR_WINDOW + 1);
+		wcex.lpszClassName = "BerylliumWindowClass";
+		wcex.hIconSm = ::LoadIconA(nullptr, (::LPCSTR)IDI_APPLICATION);
+		::RegisterClassExA(&wcex);
+	}
+
+	WindowsWindow::~WindowsWindow()
+	{
+		::DestroyWindow(m_handle);
+		::UnregisterClassA("BerylliumWindowClass", ::GetModuleHandleA(nullptr));
+	}
+
+	void WindowsWindow::SetTitle(std::string _title)
+	{
+		Window::SetTitle(_title);
+		::SetWindowTextA(m_handle, _title.c_str());
+	}
+
+	void WindowsWindow::OnUpdate()
+	{
+		::MSG msg;
+		::ZeroMemory(&msg, sizeof(msg));
+		while (::PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessageA(&msg);
+		}
+	}
+
+	void WindowsWindow::Open()
+	{
+		if (m_handle == nullptr)
+		{
+			::RECT clientRect; clientRect.left = 0;
+			clientRect.top = 0;
+			clientRect.right = m_data.width;
+			clientRect.bottom = m_data.height;
+			::AdjustWindowRect(&clientRect, WS_OVERLAPPEDWINDOW, FALSE);
+
+			m_handle = ::CreateWindowExA(
+				0,
+				"BerylliumWindowClass",
+				m_data.title.c_str(),
+				WS_OVERLAPPEDWINDOW,
+				CW_USEDEFAULT,
+				CW_USEDEFAULT,
+				clientRect.right - clientRect.left,
+				clientRect.bottom - clientRect.top,
+				nullptr,
+				nullptr,
+				::GetModuleHandleA(nullptr),
+				&m_data
+			);
+
+			if (m_handle == nullptr)
+			{
+				::UnregisterClassA("BerylliumWindowClass", ::GetModuleHandleA(nullptr));
+				throw std::runtime_error("Failed to create window");
+			}
+		}
+		::ShowWindow(m_handle, SW_SHOW);
+		::SetForegroundWindow(m_handle);
+		::SetFocus(m_handle);
+	}
+
+	bool WindowsWindow::IsOpen() const
+	{
+		return ::IsWindow(m_handle);
+	}
+
+	void WindowsWindow::Close()
+	{
+		::DestroyWindow(m_handle);
+	}
+
+	void* WindowsWindow::GetNativeWindow() const
+	{
+		return m_handle;
+	}
+
+	::LRESULT WindowsWindow::WndProc(HWND _hwnd, UINT _msg, WPARAM _wParam, LPARAM _lParam)
+	{
+		WindowData* wd = nullptr;
+		if (_msg == WM_NCCREATE)
+		{
+			::LPCREATESTRUCTA lpcs = (::LPCREATESTRUCTA)_lParam;
+			wd = (WindowData*)lpcs->lpCreateParams;
+			::SetWindowLongPtrA(_hwnd, GWLP_USERDATA, (::LONG_PTR)wd);
+		}
+		else
+		{
+			wd = (WindowData*)::GetWindowLongPtrA(_hwnd, GWLP_USERDATA);
+			if (wd == nullptr)
+			{
+				return ::DefWindowProcA(_hwnd, _msg, _wParam, _lParam);
+			}
+		}
+
+
+		//::POINTS mp = MAKEPOINTS(_lParam);
+		//auto offset = GET_WHEEL_DELTA_WPARAM(_wParam);
+		//return (::LRESULT)!wd->eventCallback(MouseButtonReleasedEvent(2, loc.x, loc.y));
+
+		switch (_msg)
+		{
+			//TODO: mouse events
+		case WM_MOUSEMOVE:
+		{
+			::POINTS mp = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseMoved(mp.x, mp.y));
+			break;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			::POINTS mp = MAKEPOINTS(_lParam);
+			auto offset = GET_WHEEL_DELTA_WPARAM(_wParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseScrolled(offset, mp.x, mp.y));
+			break;
+		}
+		case WM_LBUTTONDOWN:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Left, loc.x, loc.y));
+		}
+		case WM_MBUTTONDOWN:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Middle, loc.x, loc.y));
+		}
+		case WM_RBUTTONDOWN:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Right, loc.x, loc.y));
+		}
+		case WM_LBUTTONUP:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Left, loc.x, loc.y));
+		}
+		case WM_MBUTTONUP:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Middle, loc.x, loc.y));
+		}
+		case WM_RBUTTONUP:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Right, loc.x, loc.y));
+		}
+		case WM_LBUTTONDBLCLK:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Left, loc.x, loc.y, true));
+		}
+		case WM_MBUTTONDBLCLK:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Middle, loc.x, loc.y, true));
+		}
+		case WM_RBUTTONDBLCLK:
+		{
+			POINTS loc = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Right, loc.x, loc.y, true));
+		}
+		case WM_KEYDOWN:
+		{
+			//if key was already down, ignore
+			if (_lParam & 0x40000000)
+			{
+				break;
+			}
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::KeyPressed(_wParam));
+			break;
+		}
+		case WM_KEYUP:
+		{
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::KeyReleased(_wParam));
+			break;
+		}
+		case WM_SIZE:
+		{
+			//get size
+			::RECT rect;
+			::GetClientRect(_hwnd, &rect);
+
+			//using GetClientRect, top left corner of client area is (0,0) so just forward the right and bottom values
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowResized(rect.right, rect.bottom));
+			break;
+		}
+		case WM_CLOSE:
+		{
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowClosed());
+			break;
+		}
+		case WM_SETFOCUS:
+		{
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowFocusChanged(true));
+			break;
+		}
+		case WM_KILLFOCUS:
+		{
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowFocusChanged(false));
+			break;
+		}
+		case WM_MOVE:
+		{
+			::POINTS mp = MAKEPOINTS(_lParam);
+			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowMoved(mp.x, mp.y));
+			break;
+		}
+
+		default:
+			return ::DefWindowProcA(_hwnd, _msg, _wParam, _lParam);
+		}
+		return 0;
+
+	}
+
+	Beryllium::Window* CreateApplicationWindow(const std::string& _title, unsigned int _width, unsigned int _height)
+	{
+		return new WindowsWindow(_title, _width, _height);
+	}
+}

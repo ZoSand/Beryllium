@@ -1,0 +1,31 @@
+#ifndef BE_WINDOWS_WINDOW_HPP
+#define BE_WINDOWS_WINDOW_HPP
+
+#	include <Beryllium/Window.hpp>
+#	include <Windows.h>
+
+namespace Beryllium
+{
+	class BE_API WindowsWindow : public Beryllium::Window
+	{
+	public:
+		WindowsWindow(const std::string& _title, unsigned int _width, unsigned int _height);
+		virtual ~WindowsWindow();
+
+		virtual void SetTitle(std::string _title) override;
+
+		virtual void OnUpdate() override;
+		virtual void Open() override;
+		virtual bool IsOpen() const override;
+		virtual void Close() override;
+		virtual void* GetNativeWindow() const override;
+	private:
+		::HWND m_handle = nullptr;
+
+		static ::LRESULT CALLBACK WndProc(HWND _hwnd, UINT _msg, WPARAM _wParam, LPARAM _lParam);
+	};
+
+	Beryllium::Window* CreateApplicationWindow(const std::string& _title, unsigned int _width, unsigned int _height);
+}
+
+#endif
