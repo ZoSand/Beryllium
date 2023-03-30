@@ -4,6 +4,8 @@
 #	include <Beryllium/Window.hpp>
 #	include <Windows.h>
 
+#	define BE_WINDOW_CLASS_NAME "BerylliumWindowClass"
+
 namespace Beryllium
 {
 	class BE_API WindowsWindow : public Beryllium::Window
@@ -15,7 +17,6 @@ namespace Beryllium
 		virtual void SetTitle(std::string _title) override;
 
 		virtual void OnUpdate() override;
-		virtual void Open() override;
 		virtual bool IsOpen() const override;
 		virtual void Close() override;
 		virtual void* GetNativeWindow() const override;

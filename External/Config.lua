@@ -63,3 +63,12 @@ filter { "configurations:Distribution" }
 		"DIST"
 	}
 	optimize "On"
+
+filter { "system:windows", "configurations:Debug" }
+	buildoptions "/MDd"
+	
+filter { "system:windows", "configurations:Release" }
+	buildoptions "/MD"
+	
+filter { "system:windows", "configurations:Distribution" }
+	buildoptions "/MD"

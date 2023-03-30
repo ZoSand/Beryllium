@@ -31,7 +31,6 @@ namespace Beryllium
 		virtual void SetTitle(std::string _title);
 
 		virtual void OnUpdate() = 0;
-		virtual void Open() = 0;
 		virtual bool IsOpen() const = 0;
 		virtual void Close() = 0;
 		virtual void* GetNativeWindow() const = 0;

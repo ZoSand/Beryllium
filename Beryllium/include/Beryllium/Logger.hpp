@@ -53,6 +53,12 @@ namespace Beryllium
 	};
 }
 
+#	define BE_TRACE(...) Beryllium::Logger::Trace(__VA_ARGS__)
+#	define BE_INFO(...) Beryllium::Logger::Info(__VA_ARGS__)
+#	define BE_WARN(...) Beryllium::Logger::Warn(__VA_ARGS__)
+#	define BE_ERROR(...) Beryllium::Logger::Error(__VA_ARGS__)
+#	define BE_CRITICAL(...) Beryllium::Logger::Critical(__VA_ARGS__)
+
 #	include <Beryllium/Logger.inl>
 
 #endif // BE_LOGGER_HPP

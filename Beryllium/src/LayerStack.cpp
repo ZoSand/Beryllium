@@ -17,8 +17,7 @@ namespace Beryllium
 
 	void LayerStack::PushLayer(Layer* layer)
 	{
-		m_layers.emplace(m_layers.begin() + m_layerInsertIndex, layer);
-		m_layerInsertIndex++;
+		m_layerInsertIt = m_layers.emplace(m_layerInsertIt, layer);
 	}
 
 	void LayerStack::PushOverlay(Layer* overlay)
@@ -32,7 +31,7 @@ namespace Beryllium
 		if (it != m_layers.end())
 		{
 			m_layers.erase(it);
-			m_layerInsertIndex--;
+			m_layerInsertIt--;
 		}
 	}
 

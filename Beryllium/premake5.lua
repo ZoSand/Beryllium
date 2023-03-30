@@ -36,4 +36,4 @@ project "Beryllium"
 		removefiles {
 			"**/Platforms/Linux/**",
 			"**/Platforms/MacOSX/**"
-		}
+		}	

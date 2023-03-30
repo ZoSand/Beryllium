@@ -34,7 +34,7 @@ namespace Beryllium
 
 	private:
 		std::vector<Layer*> m_layers;
-		unsigned int m_layerInsertIndex = 0;
+		std::vector<Layer*>::iterator m_layerInsertIt;
 	};
 }
 

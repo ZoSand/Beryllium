@@ -9,7 +9,8 @@ namespace Beryllium
 	WindowsWindow::WindowsWindow(const std::string& _title, unsigned int _width, unsigned int _height)
 		: Beryllium::Window(_title, _width, _height)
 	{
-		::tagWNDCLASSEXA wcex;
+		::WNDCLASSEXA wcex;
+		::RECT clientRect;
 
 		::ZeroMemory(&wcex, sizeof(wcex));
 		wcex.cbSize = sizeof(wcex);
@@ -19,15 +20,46 @@ namespace Beryllium
 		wcex.hIcon = ::LoadIconA(nullptr, (::LPCSTR)IDI_APPLICATION);
 		wcex.hCursor = ::LoadCursorA(nullptr, (::LPCSTR)IDC_ARROW);
 		wcex.hbrBackground = (::HBRUSH)(COLOR_WINDOW + 1);
-		wcex.lpszClassName = "BerylliumWindowClass";
+		wcex.lpszClassName = BE_WINDOW_CLASS_NAME;
 		wcex.hIconSm = ::LoadIconA(nullptr, (::LPCSTR)IDI_APPLICATION);
 		::RegisterClassExA(&wcex);
+
+		clientRect.left = 0;
+		clientRect.top = 0;
+		clientRect.right = m_data.width;
+		clientRect.bottom = m_data.height;
+		::AdjustWindowRect(&clientRect, WS_OVERLAPPEDWINDOW, FALSE);
+
+		m_handle = ::CreateWindowExA(
+			0,
+			BE_WINDOW_CLASS_NAME,
+			m_data.title.c_str(),
+			WS_OVERLAPPEDWINDOW,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			clientRect.right - clientRect.left,
+			clientRect.bottom - clientRect.top,
+			nullptr,
+			nullptr,
+			::GetModuleHandleA(nullptr),
+			&m_data
+		);
+
+		if (m_handle == nullptr)
+		{
+			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			throw std::runtime_error("Failed to create window");
+		}
+		
+		::ShowWindow(m_handle, SW_SHOW);
+		::SetForegroundWindow(m_handle);
+		::SetFocus(m_handle);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
 		::DestroyWindow(m_handle);
-		::UnregisterClassA("BerylliumWindowClass", ::GetModuleHandleA(nullptr));
+		::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
 	}
 
 	void WindowsWindow::SetTitle(std::string _title)
@@ -45,42 +77,6 @@ namespace Beryllium
 			::TranslateMessage(&msg);
 			::DispatchMessageA(&msg);
 		}
-	}
-
-	void WindowsWindow::Open()
-	{
-		if (m_handle == nullptr)
-		{
-			::RECT clientRect; clientRect.left = 0;
-			clientRect.top = 0;
-			clientRect.right = m_data.width;
-			clientRect.bottom = m_data.height;
-			::AdjustWindowRect(&clientRect, WS_OVERLAPPEDWINDOW, FALSE);
-
-			m_handle = ::CreateWindowExA(
-				0,
-				"BerylliumWindowClass",
-				m_data.title.c_str(),
-				WS_OVERLAPPEDWINDOW,
-				CW_USEDEFAULT,
-				CW_USEDEFAULT,
-				clientRect.right - clientRect.left,
-				clientRect.bottom - clientRect.top,
-				nullptr,
-				nullptr,
-				::GetModuleHandleA(nullptr),
-				&m_data
-			);
-
-			if (m_handle == nullptr)
-			{
-				::UnregisterClassA("BerylliumWindowClass", ::GetModuleHandleA(nullptr));
-				throw std::runtime_error("Failed to create window");
-			}
-		}
-		::ShowWindow(m_handle, SW_SHOW);
-		::SetForegroundWindow(m_handle);
-		::SetFocus(m_handle);
 	}
 
 	bool WindowsWindow::IsOpen() const

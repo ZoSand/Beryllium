@@ -14,8 +14,6 @@ namespace Beryllium
 		m_window = CreateApplicationWindow(_specs.name, 1280, 720);
 
 		m_window->AddListener(this);
-
-		m_window->Open();
 	};
 
 	Application::~Application()
@@ -27,28 +25,24 @@ namespace Beryllium
 	void Application::PushLayer(Beryllium::Layer* _layer)
 	{
 		m_layerStack.PushLayer(_layer);
-		m_window->AddListener(_layer);
 		_layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Beryllium::Layer* _overlay)
 	{
 		m_layerStack.PushOverlay(_overlay);
-		m_window->AddListener(_overlay);
 		_overlay->OnAttach();
 	}
 
 	void Application::PopLayer(Beryllium::Layer* _layer)
 	{
 		m_layerStack.PopLayer(_layer);
-		m_window->RemoveListener(_layer);
 		_layer->OnDetach();
 	}
 
 	void Application::PopOverlay(Beryllium::Layer* _overlay)
 	{
 		m_layerStack.PopOverlay(_overlay);
-		m_window->RemoveListener(_overlay);
 		_overlay->OnDetach();
 	}
 
@@ -67,14 +61,24 @@ namespace Beryllium
 
 	bool Application::OnEvent(Beryllium::Event& _event)
 	{
-		Logger::Trace("Event: %s", typeid(_event).name());
+		BE_TRACE("Event: %s", typeid(_event).name());
 
 		if (_event.Is<Beryllium::Events::WindowClosed>())
 		{
 			m_window->Close();
-			Logger::Trace("Window closed");
+			BE_TRACE("Window closed");
 			return true;
 		}
+
+		for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend();)
+		{
+			if ((*++it)->OnEvent(_event))
+			{
+				BE_TRACE("Event handled by layer: %s", typeid(*it).name());
+				return true;
+			}
+		}
+		
 		return false;
 	}
 }
