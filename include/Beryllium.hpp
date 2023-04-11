@@ -18,7 +18,7 @@
 
 // APPLICATION
 #	include <Beryllium/Application.hpp>
-#	include <Beryllium/Entry.hpp>
+//#	include <Beryllium/Entry.hpp>
 
 // PLATFORM
 #	if defined(BE_PLATFORM_WINDOWS)
