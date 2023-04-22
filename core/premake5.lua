@@ -14,8 +14,8 @@ project "Beryllium"
 		"BE_EXPORTS"
 	}
 	includedirs {
-		"include"
-    "vendor/glad/include"
+		"include",
+    "../vendor/glad/include"
 	}
 	links {
 		"glad"
