@@ -15,6 +15,10 @@ project "Beryllium"
 	}
 	includedirs {
 		"include"
+    "vendor/glad/include"
+	}
+	links {
+		"glad"
 	}
 
 	filter { "system:linux" }
