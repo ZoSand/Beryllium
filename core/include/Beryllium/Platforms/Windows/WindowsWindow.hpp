@@ -22,6 +22,8 @@ namespace Beryllium
 		virtual void* GetNativeWindow() const override;
 	private:
 		::HWND m_handle = nullptr;
+		::HDC m_deviceContext = nullptr;
+		::HGLRC m_context = nullptr;
 
 		static ::LRESULT CALLBACK WndProc(HWND _hwnd, UINT _msg, WPARAM _wParam, LPARAM _lParam);
 	};

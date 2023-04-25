@@ -1,6 +1,11 @@
 #include <Beryllium/Platforms/Windows/WindowsWindow.hpp>
 #include <Beryllium/Logger.hpp>
 
+//TODO: Remove this
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/wglext.h>
+
 #include <stdexcept>
 #include <Beryllium/Events/CommonEvents.hpp>
 
@@ -11,8 +16,12 @@ namespace Beryllium
 	{
 		::WNDCLASSEXA wcex;
 		::RECT clientRect;
+		::PIXELFORMATDESCRIPTOR pfd;
+		int pixelFormat;
 
 		::ZeroMemory(&wcex, sizeof(wcex));
+		::ZeroMemory(&pfd, sizeof(pfd));
+
 		wcex.cbSize = sizeof(wcex);
 		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 		wcex.lpfnWndProc = WindowsWindow::WndProc;
@@ -50,7 +59,53 @@ namespace Beryllium
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
 			throw std::runtime_error("Failed to create window");
 		}
-		
+
+		pfd.nSize = sizeof(pfd);
+		pfd.nVersion = 1;
+		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		pfd.iPixelType = PFD_TYPE_RGBA;
+		pfd.cColorBits = 32;
+		pfd.cDepthBits = 24;
+		pfd.cStencilBits = 8;
+		pfd.iLayerType = PFD_MAIN_PLANE;
+
+		m_deviceContext = ::GetDC(m_handle);
+
+		pixelFormat = ::ChoosePixelFormat(m_deviceContext, &pfd);
+		if (pixelFormat == 0)
+		{
+			::ReleaseDC(m_handle, m_deviceContext);
+			::DestroyWindow(m_handle);
+			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			throw std::runtime_error("Failed to choose pixel format");
+		}
+
+		if (!::SetPixelFormat(m_deviceContext, pixelFormat, &pfd))
+		{
+			::ReleaseDC(m_handle, m_deviceContext);
+			::DestroyWindow(m_handle);
+			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			throw std::runtime_error("Failed to set pixel format");
+		}
+
+		m_context = ::wglCreateContext(m_deviceContext);
+		if (m_context == nullptr)
+		{
+			::ReleaseDC(m_handle, m_deviceContext);
+			::DestroyWindow(m_handle);
+			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			throw std::runtime_error("Failed to create OpenGL context");
+		}
+
+		if (!::wglMakeCurrent(m_deviceContext, m_context))
+		{
+			::wglDeleteContext(m_context);
+			::ReleaseDC(m_handle, m_deviceContext);
+			::DestroyWindow(m_handle);
+			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			throw std::runtime_error("Failed to make OpenGL context current");
+		}
+
 		::ShowWindow(m_handle, SW_SHOW);
 		::SetForegroundWindow(m_handle);
 		::SetFocus(m_handle);
@@ -58,6 +113,18 @@ namespace Beryllium
 
 	WindowsWindow::~WindowsWindow()
 	{
+		::wglMakeCurrent(nullptr, nullptr);
+
+		if (m_context)
+		{
+			::wglDeleteContext(m_context);
+		}
+
+		if (m_deviceContext)
+		{
+			::ReleaseDC(m_handle, m_deviceContext);
+		}
+
 		::DestroyWindow(m_handle);
 		::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
 	}
@@ -77,6 +144,9 @@ namespace Beryllium
 			::TranslateMessage(&msg);
 			::DispatchMessageA(&msg);
 		}
+
+		//swap buffers
+		::SwapBuffers(m_deviceContext);
 	}
 
 	bool WindowsWindow::IsOpen() const

@@ -7,6 +7,7 @@ project "Beryllium"
 	files {
 		"**.cd",
 		"include/**.hpp",
+		"include/**.h",
 		"include/**.inl",
 		"src/**.cpp"
 	}
@@ -18,7 +19,8 @@ project "Beryllium"
     "../vendor/glad/include"
 	}
 	links {
-		"glad"
+		"glad",
+		"opengl32"
 	}
 
 	filter { "system:linux" }
