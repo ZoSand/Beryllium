@@ -1,2 +1,1 @@
-group "Engine/Vendor"
-  include "glad"
+include "glad"

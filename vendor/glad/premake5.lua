@@ -13,6 +13,10 @@ project "glad"
   includedirs {
     "include"
   }
+
+  links {
+	"opengl32"
+  }
   
   filter "system:windows"
     systemversion "latest"
