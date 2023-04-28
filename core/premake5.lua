@@ -17,10 +17,12 @@ project "Beryllium"
 	}
 	includedirs {
 		"include",
-		"../vendor/glad/include"
+		"../vendor/glad/include",
+		"../vendor/imgui"
 	}
 	links {
 		"glad",
+		"ImGui",
 		"opengl32"
 	}
 
