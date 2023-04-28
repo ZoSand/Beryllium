@@ -1,9 +1,10 @@
 project "Beryllium"
-  location "" 
+	location "" 
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
 	systemversion "latest"
+	
 	files {
 		"**.cd",
 		"include/**.hpp",
@@ -16,7 +17,7 @@ project "Beryllium"
 	}
 	includedirs {
 		"include",
-    "../vendor/glad/include"
+		"../vendor/glad/include"
 	}
 	links {
 		"glad",
@@ -25,7 +26,7 @@ project "Beryllium"
 
 	filter { "system:linux" }
 		removefiles { 
-			"**/Platforms/Linux/**",
+			"**/Platforms/Windows/**",
 			"**/Platforms/MacOSX/**"
 		}
 
