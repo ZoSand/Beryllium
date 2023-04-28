@@ -2,9 +2,7 @@
 #include <Beryllium/Logger.hpp>
 
 //TODO: Remove this
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/wglext.h>
+#include <glad/glad.h>
 
 #include <stdexcept>
 #include <Beryllium/Events/CommonEvents.hpp>
@@ -77,6 +75,7 @@ namespace Beryllium
 			::ReleaseDC(m_handle, m_deviceContext);
 			::DestroyWindow(m_handle);
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			Logger::Critical("Failed to choose pixel format");
 			throw std::runtime_error("Failed to choose pixel format");
 		}
 
@@ -85,6 +84,7 @@ namespace Beryllium
 			::ReleaseDC(m_handle, m_deviceContext);
 			::DestroyWindow(m_handle);
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			Logger::Critical("Failed to set pixel format");
 			throw std::runtime_error("Failed to set pixel format");
 		}
 
@@ -94,6 +94,7 @@ namespace Beryllium
 			::ReleaseDC(m_handle, m_deviceContext);
 			::DestroyWindow(m_handle);
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			Logger::Critical("Failed to create OpenGL context");
 			throw std::runtime_error("Failed to create OpenGL context");
 		}
 
@@ -103,7 +104,18 @@ namespace Beryllium
 			::ReleaseDC(m_handle, m_deviceContext);
 			::DestroyWindow(m_handle);
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			Logger::Critical("Failed to make OpenGL context current");
 			throw std::runtime_error("Failed to make OpenGL context current");
+		}
+
+		if (!::gladLoadGL())
+		{
+			::wglDeleteContext(m_context);
+			::ReleaseDC(m_handle, m_deviceContext);
+			::DestroyWindow(m_handle);
+			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+			Logger::Critical("Failed to load GLAD");
+			throw std::runtime_error("Failed to load GLAD");
 		}
 
 		::ShowWindow(m_handle, SW_SHOW);
