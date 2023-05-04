@@ -2,6 +2,7 @@
 #define BE_LAYER_STACK_HPP
 
 #include <Beryllium/API.hpp>
+#include <Beryllium/Layer.hpp>
 #include <Beryllium/Events/Event.hpp>
 #include <Beryllium/Events/EventDispatcher.hpp>
 
@@ -9,8 +10,6 @@
 
 namespace Beryllium
 {
-	class Layer;
-
 	class BE_API LayerStack
 	{
 	public:
@@ -34,7 +33,7 @@ namespace Beryllium
 
 	private:
 		std::vector<Layer*> m_layers;
-		std::vector<Layer*>::iterator m_layerInsertIt;
+		unsigned int  m_layerInsertIt;
 	};
 }
 

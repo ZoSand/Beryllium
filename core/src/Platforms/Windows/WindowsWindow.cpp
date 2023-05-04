@@ -163,12 +163,13 @@ namespace Beryllium
 
 	bool WindowsWindow::IsOpen() const
 	{
-		return ::IsWindow(m_handle);
+		return ::IsWindow(m_handle) && IsWindowVisible(m_handle);
 	}
 
 	void WindowsWindow::Close()
 	{
-		::DestroyWindow(m_handle);
+		::CloseWindow(m_handle);
+		::ShowWindow(m_handle, SW_HIDE);
 	}
 
 	void* WindowsWindow::GetNativeWindow() const

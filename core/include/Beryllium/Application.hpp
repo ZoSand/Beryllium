@@ -8,6 +8,8 @@
 #	include <Beryllium/Layer.hpp>
 #	include <Beryllium/LayerStack.hpp>
 
+#	include <Beryllium/Layers/ImGuiLayer.hpp>
+
 #	if defined(BE_PLATFORM_WINDOWS)
 #		include <Beryllium/Platforms/Windows/WindowsWindow.hpp>
 #	else
@@ -43,6 +45,12 @@ namespace Beryllium
 		Application& operator=(const Beryllium::Application&) = delete;
 		Application& operator=(const Beryllium::Application&&) = delete;
 
+		//get application instance
+		static Application* Get();
+		
+		//get window
+		const Beryllium::Window* GetWindow() const;
+
 		// push a layer to the layer stack
 		void PushLayer(Beryllium::Layer* _layer);
 		void PushOverlay(Beryllium::Layer* _overlay);
@@ -50,14 +58,19 @@ namespace Beryllium
 		// pop a layer from the layer stack
 		void PopLayer(Beryllium::Layer* _layer);
 		void PopOverlay(Beryllium::Layer* _overlay);
-		
+
 		// run the application
 		void Run();
 
 	private:
+		static Application* s_application;
+
 		Beryllium::Window* m_window = nullptr;
 		Beryllium::ApplicationSpecs m_specs;
 		Beryllium::LayerStack m_layerStack;
+		Beryllium::ImGuiLayer* m_ImGuiLayer;
+
+		static void Set(Application* _application);
 
 		virtual bool OnEvent(Beryllium::Event& _event) override;
 	};

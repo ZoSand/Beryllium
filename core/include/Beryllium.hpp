@@ -7,6 +7,7 @@
 // CORE
 #	include <Beryllium/Logger.hpp>
 
+
 // EVENTS
 #	include <Beryllium/Events/EventDispatcher.hpp>
 #	include <Beryllium/Events/EventListener.hpp>
@@ -15,6 +16,12 @@
 
 // PLATFORMS
 #	include <Beryllium/Window.hpp>
+
+// LAYERS
+#	include <Beryllium/Layer.hpp>
+#	include <Beryllium/LayerStack.hpp>
+
+#	include <Beryllium/Layers/ImGuiLayer.hpp>
 
 // APPLICATION
 #	include <Beryllium/Application.hpp>
