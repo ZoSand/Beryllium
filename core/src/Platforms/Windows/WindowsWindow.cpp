@@ -6,6 +6,9 @@
 
 #include <stdexcept>
 #include <Beryllium/Events/CommonEvents.hpp>
+#include <imgui.h>
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace Beryllium
 {
@@ -180,6 +183,12 @@ namespace Beryllium
 	::LRESULT WindowsWindow::WndProc(HWND _hwnd, UINT _msg, WPARAM _wParam, LPARAM _lParam)
 	{
 		WindowData* wd = nullptr;
+
+		if (ImGui_ImplWin32_WndProcHandler(_hwnd, _msg, _wParam, _lParam) == TRUE)
+		{
+			return 0;
+		}
+
 		if (_msg == WM_NCCREATE)
 		{
 			::LPCREATESTRUCTA lpcs = (::LPCREATESTRUCTA)_lParam;

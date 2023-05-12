@@ -84,9 +84,11 @@ namespace Beryllium
 				layer->OnUpdate();
 			}
 
-			m_ImGuiLayer->Begin();
-			bool show = true;
-			ImGui::ShowDemoWindow(&show);
+			m_ImGuiLayer->Begin(); 
+			{
+				static bool show = true;
+				ImGui::ShowDemoWindow(&show);
+			}
 			m_ImGuiLayer->End();
 		}
 	}
