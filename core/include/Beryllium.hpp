@@ -6,7 +6,9 @@
 
 // CORE
 #	include <Beryllium/Logger.hpp>
-
+#	include <Beryllium/Window.hpp>
+#	include <Beryllium/Keyboard.hpp>
+#	include <Beryllium/Mouse.hpp>
 
 // EVENTS
 #	include <Beryllium/Events/EventDispatcher.hpp>
@@ -25,7 +27,6 @@
 
 // APPLICATION
 #	include <Beryllium/Application.hpp>
-//#	include <Beryllium/Entry.hpp>
 
 // PLATFORM
 #	if defined(BE_PLATFORM_WINDOWS)

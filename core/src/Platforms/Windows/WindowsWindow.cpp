@@ -323,9 +323,4 @@ namespace Beryllium
 		return 0;
 
 	}
-
-	Beryllium::Window* CreateApplicationWindow(const std::string& _title, unsigned int _width, unsigned int _height)
-	{
-		return new WindowsWindow(_title, _width, _height);
-	}
 }

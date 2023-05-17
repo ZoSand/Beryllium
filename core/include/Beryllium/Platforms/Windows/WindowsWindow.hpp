@@ -27,8 +27,6 @@ namespace Beryllium
 
 		static ::LRESULT CALLBACK WndProc(HWND _hwnd, UINT _msg, WPARAM _wParam, LPARAM _lParam);
 	};
-
-	Beryllium::Window* CreateApplicationWindow(const std::string& _title, unsigned int _width, unsigned int _height);
 }
 
 #endif

@@ -23,7 +23,13 @@ namespace Beryllium
 		}
 
 		Application::Set(this);
-		m_window = CreateApplicationWindow(_specs.name, 1280, 720);
+
+		//WARNING: platform specific code 
+#if defined(BE_PLATFORM_WINDOWS)
+		m_window = new WindowsWindow(_specs.name, 1280, 720);
+#else
+#	error "Beryllium is missing a window for this platform"
+#endif
 
 		m_window->AddListener(this);
 
@@ -84,10 +90,10 @@ namespace Beryllium
 				layer->OnUpdate();
 			}
 
-			m_ImGuiLayer->Begin(); 
+			m_ImGuiLayer->Begin();
 			{
-				static bool show = true;
-				ImGui::ShowDemoWindow(&show);
+				//static bool show = true;
+				//ImGui::ShowDemoWindow(&show);
 			}
 			m_ImGuiLayer->End();
 		}
@@ -96,7 +102,6 @@ namespace Beryllium
 	bool Application::OnEvent(Beryllium::Event& _event)
 	{
 		//BE_TRACE("Event: %s", typeid(_event).name());
-
 		if (_event.Is<Beryllium::Events::WindowClosed>())
 		{
 			m_window->Close();
