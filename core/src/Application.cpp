@@ -7,6 +7,15 @@
 
 #include <imgui.h>
 
+
+#	if defined(BE_PLATFORM_WINDOWS)
+#		include <Beryllium/Platforms/Windows/WindowsWindow.hpp>
+#		include <Beryllium/Platforms/Windows/WindowsKeyboard.hpp>
+//#		include <Beryllium/Platforms/Windows/WindowsMouse.hpp>
+#	else
+#		error "Beryllium Window is only implemented on Windows!"
+#	endif
+
 namespace Beryllium
 {
 	Application* Application::s_application = nullptr;
@@ -27,6 +36,8 @@ namespace Beryllium
 		//WARNING: platform specific code 
 #if defined(BE_PLATFORM_WINDOWS)
 		m_window = new WindowsWindow(_specs.name, 1280, 720);
+		m_keyboard = new WindowsKeyboard();
+		//m_mouse = new WindowsMouse();
 #else
 #	error "Beryllium is missing a window for this platform"
 #endif
@@ -41,6 +52,8 @@ namespace Beryllium
 	{
 		Beryllium::Logger::Shutdown();
 		m_layerStack.~LayerStack();
+		//delete m_mouse;
+		delete m_keyboard;
 		delete m_window;
 	}
 

@@ -25,4 +25,9 @@ namespace Beryllium
 	{
 		return Keyboard::GetInstance()->IsKeyPressedImpl(_key);
 	}
+
+	bool Keyboard::IsKeyPressed(char _key)
+	{
+		return Keyboard::GetInstance()->IsKeyPressedImpl(_key);
+	}
 }

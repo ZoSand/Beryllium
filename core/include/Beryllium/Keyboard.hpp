@@ -11,6 +11,7 @@ namespace Beryllium
 	{
 	public:
 		static bool IsKeyPressed(std::string _key);
+		static bool IsKeyPressed(char _key);
 	private: 
 		static Keyboard* s_instance;
 		static Keyboard* GetInstance();
@@ -19,6 +20,7 @@ namespace Beryllium
 		void SetInstance(Keyboard* _instance);
 
 		virtual bool IsKeyPressedImpl(std::string _key) = 0;
+		virtual bool IsKeyPressedImpl(char _key) = 0;
 	};
 }
 

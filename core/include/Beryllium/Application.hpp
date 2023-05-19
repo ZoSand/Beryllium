@@ -5,16 +5,14 @@
 #	include <Beryllium/Events/Event.hpp>
 #	include <Beryllium/Events/EventListener.hpp>
 
+#	include <Beryllium/Window.hpp>
+#	include <Beryllium/Keyboard.hpp>
+#	include <Beryllium/Mouse.hpp>
+
 #	include <Beryllium/Layer.hpp>
 #	include <Beryllium/LayerStack.hpp>
 
 #	include <Beryllium/Layers/ImGuiLayer.hpp>
-
-#	if defined(BE_PLATFORM_WINDOWS)
-#		include <Beryllium/Platforms/Windows/WindowsWindow.hpp>
-#	else
-#		error "Beryllium Window is only implemented on Windows!"
-#	endif
 
 #	include <string>
 
@@ -66,6 +64,9 @@ namespace Beryllium
 		static Application* s_application;
 
 		Beryllium::Window* m_window = nullptr;
+		Beryllium::Keyboard* m_keyboard = nullptr;
+		Beryllium::Mouse* m_mouse = nullptr;
+
 		Beryllium::ApplicationSpecs m_specs;
 		Beryllium::LayerStack m_layerStack;
 		Beryllium::ImGuiLayer* m_ImGuiLayer;
