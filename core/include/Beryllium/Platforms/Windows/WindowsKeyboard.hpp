@@ -12,6 +12,7 @@ namespace Beryllium
 		WindowsKeyboard();
 		~WindowsKeyboard();
 
+	protected:
 		virtual bool IsKeyPressedImpl(std::string _key) override;
 		virtual bool IsKeyPressedImpl(char _key) override;
 	};
