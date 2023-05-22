@@ -15,11 +15,15 @@ namespace Beryllium
 		virtual ~WindowsWindow();
 
 		virtual void SetTitle(std::string _title) override;
+		virtual std::string GetTitle() const override;
+
+		virtual void* GetNativeWindow() const override;
+
+		virtual std::pair<float, float> GetSize() const override;
 
 		virtual void OnUpdate() override;
 		virtual bool IsOpen() const override;
 		virtual void Close() override;
-		virtual void* GetNativeWindow() const override;
 	private:
 		::HWND m_handle = nullptr;
 		::HDC m_deviceContext = nullptr;

@@ -36,14 +36,14 @@ namespace Beryllium
 
 		clientRect.left = 0;
 		clientRect.top = 0;
-		clientRect.right = m_data.width;
-		clientRect.bottom = m_data.height;
+		clientRect.right = _width;
+		clientRect.bottom = _height;
 		::AdjustWindowRect(&clientRect, WS_OVERLAPPEDWINDOW, FALSE);
 
 		m_handle = ::CreateWindowExA(
 			0,
 			BE_WINDOW_CLASS_NAME,
-			m_data.title.c_str(),
+			_title.c_str(),
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
@@ -52,7 +52,7 @@ namespace Beryllium
 			nullptr,
 			nullptr,
 			::GetModuleHandleA(nullptr),
-			&m_data
+			this
 		);
 
 		if (m_handle == nullptr)
@@ -146,8 +146,21 @@ namespace Beryllium
 
 	void WindowsWindow::SetTitle(std::string _title)
 	{
-		Window::SetTitle(_title);
 		::SetWindowTextA(m_handle, _title.c_str());
+	}
+
+	std::string WindowsWindow::GetTitle() const
+	{
+		std::string title;
+		int txtLen = ::GetWindowTextLengthA(m_handle);
+		::PSTR memBuf = (::PSTR)::VirtualAlloc((::LPVOID)NULL, (::DWORD)(txtLen + 1), MEM_COMMIT, PAGE_READWRITE);
+		int realLen = ::GetWindowTextA(m_handle, memBuf, txtLen + 1);
+
+		title = std::string(memBuf);
+
+		::VirtualFree((::LPVOID)memBuf, (::DWORD)(txtLen + 1), MEM_COMMIT);
+
+		return title;
 	}
 
 	void WindowsWindow::OnUpdate()
@@ -180,9 +193,16 @@ namespace Beryllium
 		return m_handle;
 	}
 
+	std::pair<float, float> WindowsWindow::GetSize() const
+	{
+		::RECT rect;
+		::GetWindowRect(m_handle, &rect);
+		return std::make_pair(rect.right - rect.left, rect.bottom - rect.top);
+	}
+
 	::LRESULT WindowsWindow::WndProc(HWND _hwnd, UINT _msg, WPARAM _wParam, LPARAM _lParam)
 	{
-		WindowData* wd = nullptr;
+		Window* wd = nullptr;
 
 		if (ImGui_ImplWin32_WndProcHandler(_hwnd, _msg, _wParam, _lParam) == TRUE)
 		{
@@ -192,12 +212,12 @@ namespace Beryllium
 		if (_msg == WM_NCCREATE)
 		{
 			::LPCREATESTRUCTA lpcs = (::LPCREATESTRUCTA)_lParam;
-			wd = (WindowData*)lpcs->lpCreateParams;
+			wd = (Window*)lpcs->lpCreateParams;
 			::SetWindowLongPtrA(_hwnd, GWLP_USERDATA, (::LONG_PTR)wd);
 		}
 		else
 		{
-			wd = (WindowData*)::GetWindowLongPtrA(_hwnd, GWLP_USERDATA);
+			wd = (Window*)::GetWindowLongPtrA(_hwnd, GWLP_USERDATA);
 			if (wd == nullptr)
 			{
 				return ::DefWindowProcA(_hwnd, _msg, _wParam, _lParam);
@@ -215,60 +235,60 @@ namespace Beryllium
 		case WM_MOUSEMOVE:
 		{
 			::POINTS mp = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseMoved(mp.x, mp.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseMoved(mp.x, mp.y));
 			break;
 		}
 		case WM_MOUSEWHEEL:
 		{
 			::POINTS mp = MAKEPOINTS(_lParam);
 			auto offset = GET_WHEEL_DELTA_WPARAM(_wParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseScrolled(offset, mp.x, mp.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseScrolled(offset, mp.x, mp.y));
 			break;
 		}
 		case WM_LBUTTONDOWN:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Left, loc.x, loc.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Left, loc.x, loc.y));
 		}
 		case WM_MBUTTONDOWN:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Middle, loc.x, loc.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Middle, loc.x, loc.y));
 		}
 		case WM_RBUTTONDOWN:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Right, loc.x, loc.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Right, loc.x, loc.y));
 		}
 		case WM_LBUTTONUP:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Left, loc.x, loc.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Left, loc.x, loc.y));
 		}
 		case WM_MBUTTONUP:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Middle, loc.x, loc.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Middle, loc.x, loc.y));
 		}
 		case WM_RBUTTONUP:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Right, loc.x, loc.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonReleased(Mouse::Button::Right, loc.x, loc.y));
 		}
 		case WM_LBUTTONDBLCLK:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Left, loc.x, loc.y, true));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Left, loc.x, loc.y, true));
 		}
 		case WM_MBUTTONDBLCLK:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Middle, loc.x, loc.y, true));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Middle, loc.x, loc.y, true));
 		}
 		case WM_RBUTTONDBLCLK:
 		{
 			POINTS loc = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Right, loc.x, loc.y, true));
+			return (::LRESULT)!wd->DispatchEvent(Events::MouseButtonPressed(Mouse::Button::Right, loc.x, loc.y, true));
 		}
 		case WM_KEYDOWN:
 		{
@@ -277,12 +297,12 @@ namespace Beryllium
 			{
 				break;
 			}
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::KeyPressed(_wParam));
+			return (::LRESULT)!wd->DispatchEvent(Events::KeyPressed(_wParam));
 			break;
 		}
 		case WM_KEYUP:
 		{
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::KeyReleased(_wParam));
+			return (::LRESULT)!wd->DispatchEvent(Events::KeyReleased(_wParam));
 			break;
 		}
 		case WM_SIZE:
@@ -292,28 +312,28 @@ namespace Beryllium
 			::GetClientRect(_hwnd, &rect);
 
 			//using GetClientRect, top left corner of client area is (0,0) so just forward the right and bottom values
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowResized(rect.right, rect.bottom));
+			return (::LRESULT)!wd->DispatchEvent(Events::WindowResized(rect.right, rect.bottom));
 			break;
 		}
 		case WM_CLOSE:
 		{
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowClosed());
+			return (::LRESULT)!wd->DispatchEvent(Events::WindowClosed());
 			break;
 		}
 		case WM_SETFOCUS:
 		{
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowFocusChanged(true));
+			return (::LRESULT)!wd->DispatchEvent(Events::WindowFocusChanged(true));
 			break;
 		}
 		case WM_KILLFOCUS:
 		{
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowFocusChanged(false));
+			return (::LRESULT)!wd->DispatchEvent(Events::WindowFocusChanged(false));
 			break;
 		}
 		case WM_MOVE:
 		{
 			::POINTS mp = MAKEPOINTS(_lParam);
-			return (::LRESULT)!wd->dispatcher->DispatchEvent(Events::WindowMoved(mp.x, mp.y));
+			return (::LRESULT)!wd->DispatchEvent(Events::WindowMoved(mp.x, mp.y));
 			break;
 		}
 

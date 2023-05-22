@@ -45,7 +45,7 @@ namespace Beryllium
 
 		//get application instance
 		static Application* Get();
-		
+
 		//get window
 		const Beryllium::Window* GetWindow() const;
 
@@ -73,6 +73,7 @@ namespace Beryllium
 
 		static void Set(Application* _application);
 
+	protected:
 		virtual bool OnEvent(Beryllium::Event& _event) override;
 	};
 

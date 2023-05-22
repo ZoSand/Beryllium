@@ -10,13 +10,6 @@
 
 namespace Beryllium
 {
-	struct WindowData
-	{
-		std::string title;
-		unsigned int width, height;
-		Beryllium::EventDispatcher* dispatcher;
-	};
-
 	class BE_API Window : public EventDispatcher
 	{
 	public:
@@ -28,15 +21,16 @@ namespace Beryllium
 		Window& operator=(const Window&) = delete;
 		Window& operator=(const Window&&) = delete;
 
-		virtual void SetTitle(std::string _title);
+		virtual void SetTitle(std::string _title) = 0;
+		virtual std::string GetTitle() const = 0;
+
+		virtual void* GetNativeWindow() const = 0;
+
+		virtual std::pair<float, float> GetSize() const = 0;
 
 		virtual void OnUpdate() = 0;
 		virtual bool IsOpen() const = 0;
 		virtual void Close() = 0;
-		virtual void* GetNativeWindow() const = 0;
-
-	protected:
-		Beryllium::WindowData m_data;
 	};
 }
 
