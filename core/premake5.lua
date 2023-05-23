@@ -10,7 +10,9 @@ project "Beryllium"
 		"include/**.hpp",
 		"include/**.h",
 		"include/**.inl",
-		"src/**.cpp"
+		"src/**.cpp",
+
+		"../vendor/glm/glm/**.hpp"
 	}
 	defines {
 		"BE_EXPORTS"
