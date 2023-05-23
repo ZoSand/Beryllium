@@ -12,7 +12,8 @@ project "Beryllium"
 		"include/**.inl",
 		"src/**.cpp",
 
-		"../vendor/glm/glm/**.hpp"
+		"../vendor/glm/glm/**.hpp",
+		"../vendor/glm/glm/**.inl"
 	}
 	defines {
 		"BE_EXPORTS"
