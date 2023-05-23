@@ -18,7 +18,8 @@ project "Beryllium"
 	includedirs {
 		"include",
 		"../vendor/glad/include",
-		"../vendor/imgui"
+		"../vendor/imgui",
+		"../vendor/glm"
 	}
 	links {
 		"glad",
