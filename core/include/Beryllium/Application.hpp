@@ -63,11 +63,10 @@ namespace Beryllium
 	private:
 		static Application* s_application;
 
-		Beryllium::Window* m_window = nullptr;
-		Beryllium::Keyboard* m_keyboard = nullptr;
-		Beryllium::Mouse* m_mouse = nullptr;
-
 		Beryllium::ApplicationSpecs m_specs;
+
+		std::unique_ptr<Beryllium::Window> m_window = nullptr;
+
 		Beryllium::LayerStack m_layerStack;
 		Beryllium::ImGuiLayer* m_ImGuiLayer;
 

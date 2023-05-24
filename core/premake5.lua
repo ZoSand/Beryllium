@@ -1,9 +1,9 @@
 project "Beryllium"
 	location "" 
-	kind "SharedLib"
+	kind "StaticLib"
+	staticruntime "on"
 	language "C++"
 	cppdialect "C++17"
-	systemversion "latest"
 	
 	files {
 		"**.cd",
@@ -43,6 +43,7 @@ project "Beryllium"
 		}
 
 	filter { "system:windows" }
+		systemversion "latest"
 		defines {
 			"BE_BUILD_DLL"
 		}

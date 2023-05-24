@@ -4,7 +4,7 @@
 
 namespace Beryllium
 {
-	Keyboard* Keyboard::s_instance = nullptr;
+	//Keyboard* Keyboard::s_instance = nullptr;
 
 	Keyboard* Keyboard::GetInstance()
 	{

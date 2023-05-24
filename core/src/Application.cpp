@@ -10,11 +10,14 @@
 
 #	if defined(BE_PLATFORM_WINDOWS)
 #		include <Beryllium/Platforms/Windows/WindowsWindow.hpp>
-#		include <Beryllium/Platforms/Windows/WindowsKeyboard.hpp>
+//#		include <Beryllium/Platforms/Windows/WindowsKeyboard.hpp>
 //#		include <Beryllium/Platforms/Windows/WindowsMouse.hpp>
 #	else
 #		error "Beryllium Window is only implemented on Windows!"
 #	endif
+
+//TODO: remove
+bool showDemo = true;
 
 namespace Beryllium
 {
@@ -35,13 +38,10 @@ namespace Beryllium
 
 		//WARNING: platform specific code 
 #if defined(BE_PLATFORM_WINDOWS)
-		m_window = new WindowsWindow(_specs.name, 1280, 720);
-		m_keyboard = new WindowsKeyboard();
-		//m_mouse = new WindowsMouse();
+		m_window = std::make_unique<WindowsWindow>(_specs.name, 1280, 720);
 #else
 #	error "Beryllium is missing a window for this platform"
 #endif
-
 		m_window->AddListener(this);
 
 		m_ImGuiLayer = new ImGuiLayer();
@@ -52,9 +52,6 @@ namespace Beryllium
 	{
 		Beryllium::Logger::Shutdown();
 		m_layerStack.~LayerStack();
-		//delete m_mouse;
-		delete m_keyboard;
-		delete m_window;
 	}
 
 	Application* Application::Get()
@@ -69,7 +66,7 @@ namespace Beryllium
 
 	const Beryllium::Window* Application::GetWindow() const
 	{
-		return m_window;
+		return m_window.get();
 	}
 
 	void Application::PushLayer(Beryllium::Layer* _layer)
@@ -105,8 +102,16 @@ namespace Beryllium
 
 			m_ImGuiLayer->Begin();
 			{
-				//static bool show = true;
-				//ImGui::ShowDemoWindow(&show);
+				if (showDemo) {
+					ImGui::ShowDemoWindow(&showDemo);
+				}
+
+
+				{
+					ImGui::Begin("Debug Info");
+					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+					ImGui::End();
+				}
 			}
 			m_ImGuiLayer->End();
 		}
@@ -126,7 +131,7 @@ namespace Beryllium
 		{
 			if ((*it)->OnEvent(_event))
 			{
-				BE_TRACE("Event handled by layer: %s", typeid(*it).name());
+				BE_TRACE("Event %s handled by layer %s", typeid(_event).name(), typeid(**it).name());
 				return true;
 			}
 		}

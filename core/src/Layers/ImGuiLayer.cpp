@@ -1,6 +1,8 @@
 #include <Beryllium/Layers/ImGuiLayer.hpp>
 #include <Beryllium.hpp>
 
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -26,11 +28,7 @@ namespace Beryllium
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
-
-		//float fontSize = 18.0f;// *2.0f;
-		//io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", fontSize);
-		//io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", fontSize);
-
+		
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
@@ -74,6 +72,7 @@ namespace Beryllium
 				e.Is<Events::KeyReleased>()
 				);
 		}
+		return false;
 	}
 
 	void ImGuiLayer::Begin()

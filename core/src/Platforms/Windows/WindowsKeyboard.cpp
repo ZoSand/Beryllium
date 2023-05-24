@@ -5,6 +5,8 @@
 
 namespace Beryllium
 {
+	Beryllium::Keyboard* Beryllium::Keyboard::s_instance = new Beryllium::WindowsKeyboard;
+
 	WindowsKeyboard::WindowsKeyboard()
 	{
 		Keyboard::SetInstance(this);
@@ -65,6 +67,7 @@ namespace Beryllium
 			return ::GetKeyState(VK_RIGHT) & (1 << 15);
 		}
 		//TODO: add other special keys
+		return IsKeyPressedImpl(_key[0]);
 	}
 
 	bool WindowsKeyboard::IsKeyPressedImpl(char _key)

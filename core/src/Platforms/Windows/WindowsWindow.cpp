@@ -142,6 +142,8 @@ namespace Beryllium
 
 		::DestroyWindow(m_handle);
 		::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
+
+		BE_TRACE("Window destroyed");
 	}
 
 	void WindowsWindow::SetTitle(std::string _title)
@@ -152,13 +154,15 @@ namespace Beryllium
 	std::string WindowsWindow::GetTitle() const
 	{
 		std::string title;
+
 		int txtLen = ::GetWindowTextLengthA(m_handle);
 		::PSTR memBuf = (::PSTR)::VirtualAlloc((::LPVOID)NULL, (::DWORD)(txtLen + 1), MEM_COMMIT, PAGE_READWRITE);
-		int realLen = ::GetWindowTextA(m_handle, memBuf, txtLen + 1);
 
-		title = std::string(memBuf);
-
-		::VirtualFree((::LPVOID)memBuf, (::DWORD)(txtLen + 1), MEM_COMMIT);
+		if (memBuf != nullptr) {
+			int realLen = ::GetWindowTextA(m_handle, memBuf, txtLen + 1);
+			title = std::string(memBuf);
+			::VirtualFree((::LPVOID)memBuf, (::DWORD)(txtLen + 1), MEM_COMMIT);
+		}
 
 		return title;
 	}
@@ -175,6 +179,10 @@ namespace Beryllium
 
 		//swap buffers
 		::SwapBuffers(m_deviceContext);
+
+		//TODO: move to render methods
+		::glClearColor(0.3f, .5f, .43f, 1.f);
+		::glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	bool WindowsWindow::IsOpen() const
@@ -204,9 +212,9 @@ namespace Beryllium
 	{
 		Window* wd = nullptr;
 
-		if (ImGui_ImplWin32_WndProcHandler(_hwnd, _msg, _wParam, _lParam) == TRUE)
+		if (ImGui_ImplWin32_WndProcHandler(_hwnd, _msg, _wParam, _lParam))
 		{
-			return 0;
+			return true;
 		}
 
 		if (_msg == WM_NCCREATE)
