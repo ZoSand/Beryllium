@@ -1,12 +1,12 @@
 #include <Beryllium/Platforms/Windows/WindowsWindow.hpp>
 #include <Beryllium/Logger.hpp>
 
-//TODO: Remove this
-#include <glad/glad.h>
+#include <Beryllium/Events/CommonEvents.hpp>
+#include <Beryllium/Platforms/OpenGL/OpenGLContext.hpp>
+
+#include <imgui.h>
 
 #include <stdexcept>
-#include <Beryllium/Events/CommonEvents.hpp>
-#include <imgui.h>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -61,6 +61,8 @@ namespace Beryllium
 			throw std::runtime_error("Failed to create window");
 		}
 
+		m_context = new Beryllium::OpenGLContext(this);
+
 		pfd.nSize = sizeof(pfd);
 		pfd.nVersion = 1;
 		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
@@ -70,56 +72,30 @@ namespace Beryllium
 		pfd.cStencilBits = 8;
 		pfd.iLayerType = PFD_MAIN_PLANE;
 
-		m_deviceContext = ::GetDC(m_handle);
+		::HDC deviceContext = ::GetDC(m_handle);
 
-		pixelFormat = ::ChoosePixelFormat(m_deviceContext, &pfd);
+		pixelFormat = ::ChoosePixelFormat(deviceContext, &pfd);
 		if (pixelFormat == 0)
 		{
-			::ReleaseDC(m_handle, m_deviceContext);
+			::ReleaseDC(m_handle, deviceContext);
 			::DestroyWindow(m_handle);
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
 			Logger::Critical("Failed to choose pixel format");
 			throw std::runtime_error("Failed to choose pixel format");
 		}
 
-		if (!::SetPixelFormat(m_deviceContext, pixelFormat, &pfd))
+		if (!::SetPixelFormat(deviceContext, pixelFormat, &pfd))
 		{
-			::ReleaseDC(m_handle, m_deviceContext);
+			::ReleaseDC(m_handle, deviceContext);
 			::DestroyWindow(m_handle);
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
 			Logger::Critical("Failed to set pixel format");
 			throw std::runtime_error("Failed to set pixel format");
 		}
 
-		m_context = ::wglCreateContext(m_deviceContext);
-		if (m_context == nullptr)
-		{
-			::ReleaseDC(m_handle, m_deviceContext);
-			::DestroyWindow(m_handle);
-			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
-			Logger::Critical("Failed to create OpenGL context");
-			throw std::runtime_error("Failed to create OpenGL context");
-		}
+		::BE_TRACE("[Window] Created");
 
-		if (!::wglMakeCurrent(m_deviceContext, m_context))
-		{
-			::wglDeleteContext(m_context);
-			::ReleaseDC(m_handle, m_deviceContext);
-			::DestroyWindow(m_handle);
-			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
-			Logger::Critical("Failed to make OpenGL context current");
-			throw std::runtime_error("Failed to make OpenGL context current");
-		}
-
-		if (!::gladLoadGL())
-		{
-			::wglDeleteContext(m_context);
-			::ReleaseDC(m_handle, m_deviceContext);
-			::DestroyWindow(m_handle);
-			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
-			Logger::Critical("Failed to load GLAD");
-			throw std::runtime_error("Failed to load GLAD");
-		}
+		m_context->Init();
 
 		::ShowWindow(m_handle, SW_SHOW);
 		::SetForegroundWindow(m_handle);
@@ -128,22 +104,13 @@ namespace Beryllium
 
 	WindowsWindow::~WindowsWindow()
 	{
-		::wglMakeCurrent(nullptr, nullptr);
-
-		if (m_context)
-		{
-			::wglDeleteContext(m_context);
-		}
-
-		if (m_deviceContext)
-		{
-			::ReleaseDC(m_handle, m_deviceContext);
-		}
+		m_context->Destroy();
+		delete m_context;
 
 		::DestroyWindow(m_handle);
 		::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
 
-		BE_TRACE("Window destroyed");
+		BE_TRACE("[Window] Destroyed");
 	}
 
 	void WindowsWindow::SetTitle(std::string _title)
@@ -178,11 +145,7 @@ namespace Beryllium
 		}
 
 		//swap buffers
-		::SwapBuffers(m_deviceContext);
-
-		//TODO: move to render methods
-		::glClearColor(0.3f, .5f, .43f, 1.f);
-		::glClear(GL_COLOR_BUFFER_BIT);
+		m_context->SwapBuffers();
 	}
 
 	bool WindowsWindow::IsOpen() const
@@ -194,6 +157,8 @@ namespace Beryllium
 	{
 		::CloseWindow(m_handle);
 		::ShowWindow(m_handle, SW_HIDE);
+
+		BE_TRACE("[Window] Closed");
 	}
 
 	void* WindowsWindow::GetNativeWindow() const

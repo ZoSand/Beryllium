@@ -2,6 +2,9 @@
 #define BE_WINDOWS_WINDOW_HPP
 
 #	include <Beryllium/Window.hpp>
+
+#	include <Beryllium/Renderer/GraphicsContext.hpp>
+
 #	include <Windows.h>
 
 #	define BE_WINDOW_CLASS_NAME "BerylliumWindowClass"
@@ -26,8 +29,8 @@ namespace Beryllium
 		virtual void Close() override;
 	private:
 		::HWND m_handle = nullptr;
-		::HDC m_deviceContext = nullptr;
-		::HGLRC m_context = nullptr;
+
+		Beryllium::GraphicsContext* m_context;
 
 		static ::LRESULT CALLBACK WndProc(HWND _hwnd, UINT _msg, WPARAM _wParam, LPARAM _lParam);
 	};

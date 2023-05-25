@@ -48,21 +48,21 @@ filter { "configurations:Debug" }
 	defines {
 		"DEBUG"
 	}
-	symbols "On"
+	symbols "on"
 
 filter { "configurations:Release" }
 	defines {
 		"NDEBUG",
 		"RELEASE"
 	}
-	optimize "On"
+	optimize "on"
 
 filter { "configurations:Distribution" }
 	defines {
 		"NDEBUG",
 		"DIST"
 	}
-	optimize "On"
+	optimize "on"
 
 filter { "system:windows", "configurations:Debug" }
 	buildoptions "/MDd"

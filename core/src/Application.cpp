@@ -16,6 +16,8 @@
 #		error "Beryllium Window is only implemented on Windows!"
 #	endif
 
+#include <glad/glad.h>
+
 //TODO: remove
 bool showDemo = true;
 
@@ -46,6 +48,33 @@ namespace Beryllium
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+
+		//TODO: move to dedicated VertexArray
+		::glGenVertexArrays(1, &m_vertexArray);
+		::glBindVertexArray(m_vertexArray);
+
+		//TODO: move to dedicated VertexBuffer
+		::glGenBuffers(1, &m_vertexBuffer);
+		::glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+
+		float vertices[3 * 3] = {
+			-.5f, -.5f, 0.f,
+			.5f, -.5f, 0.f,
+			0.f, .5f, 0.f
+		};
+		::glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		::glEnableVertexAttribArray(0);
+		::glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+
+		//TODO: move to dedicated IndexBuffer
+		::glGenBuffers(1, &m_indexBuffer);
+		::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
+
+		unsigned int indices[3] = {
+			0, 1, 2
+		};
+		::glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	};
 
 	Application::~Application()
@@ -94,6 +123,16 @@ namespace Beryllium
 		while (m_window->IsOpen())
 		{
 			m_window->OnUpdate();
+			//TODO: move to dedicated
+			::glClearColor(0.f, .63f, .56f, 1.f);
+			::glClear(GL_COLOR_BUFFER_BIT);
+
+			auto [width, height] = m_window->GetSize();
+			::glViewport(0, 0, width, height);
+
+			//TODO: move to dedicated
+			::glBindVertexArray(m_vertexArray);
+			::glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 
 			for (Beryllium::Layer* layer : m_layerStack)
 			{
@@ -123,15 +162,23 @@ namespace Beryllium
 		if (_event.Is<Beryllium::Events::WindowClosed>())
 		{
 			m_window->Close();
-			BE_TRACE("Window closed");
 			return true;
+		}
+		else if (_event.Is<Beryllium::Events::WindowFocusChanged>())
+		{
+			if (_event.As<Beryllium::Events::WindowFocusChanged>().IsFocused()) {
+				BE_TRACE("[Window] Get focus");
+			}
+			else {
+				BE_TRACE("[Window] Lost focus");
+			}
 		}
 
 		for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); ++it)
 		{
 			if ((*it)->OnEvent(_event))
 			{
-				BE_TRACE("Event %s handled by layer %s", typeid(_event).name(), typeid(**it).name());
+				//BE_TRACE("Event %s handled by layer %s", typeid(_event).name(), typeid(**it).name());
 				return true;
 			}
 		}

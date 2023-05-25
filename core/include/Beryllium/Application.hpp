@@ -70,6 +70,9 @@ namespace Beryllium
 		Beryllium::LayerStack m_layerStack;
 		Beryllium::ImGuiLayer* m_ImGuiLayer;
 
+		//TODO: define classes
+		unsigned int m_vertexArray, m_vertexBuffer, m_indexBuffer;
+
 		static void Set(Application* _application);
 
 	protected:

@@ -11,7 +11,7 @@ namespace Beryllium
 	{
 		if (s_LogLevel <= LogLevel::Trace)
 		{
-			Logger::Print("[%-8s] " + _message + "\n", "TRACE", args...);
+			Logger::Print("[%8s] " + _message + "\n", "TRACE", args...);
 		}
 	}
 
@@ -20,7 +20,7 @@ namespace Beryllium
 	{
 		if (s_LogLevel <= LogLevel::Info)
 		{
-			Logger::Print("[%-8s] " + _message + "\n", "INFO", args...);
+			Logger::Print("[%8s] " + _message + "\n", "INFO", args...);
 		}
 	}
 
@@ -29,7 +29,7 @@ namespace Beryllium
 	{
 		if (s_LogLevel <= LogLevel::Warn)
 		{
-			Logger::Print("[%-8s] " + _message + "\n", "WARNING", args...);
+			Logger::Print("[%8s] " + _message + "\n", "WARNING", args...);
 		}
 	}
 
@@ -38,7 +38,7 @@ namespace Beryllium
 	{
 		if (s_LogLevel <= LogLevel::Error)
 		{
-			Logger::Print("[%-8s] " + _message + "\n", "ERROR", args...);
+			Logger::Print("[%8s] " + _message + "\n", "ERROR", args...);
 		}
 	}
 
@@ -47,7 +47,7 @@ namespace Beryllium
 	{
 		if (s_LogLevel <= LogLevel::Critical)
 		{
-			Logger::Print("[%-8s] " + _message + "\n", "CRITICAL", args...);
+			Logger::Print("[%8s] " + _message + "\n", "CRITICAL", args...);
 		}
 	}
 
