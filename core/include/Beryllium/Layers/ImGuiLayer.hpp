@@ -21,6 +21,7 @@ namespace Beryllium
 		void BlockEvents(bool block);
 
 		void SetDarkThemeColors();
+		void SetRounding();
 
 		uint32_t GetActiveWidgetID() const;
 	private:

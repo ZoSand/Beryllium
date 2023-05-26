@@ -29,6 +29,7 @@ namespace Beryllium
 		: m_specs(_specs)
 	{
 		Beryllium::Logger::Init();
+		Beryllium::Logger::SetLevel(LogLevel::Trace);
 
 		if (Application::Get() != nullptr)
 		{
@@ -62,6 +63,12 @@ namespace Beryllium
 			.5f, -.5f, 0.f,
 			0.f, .5f, 0.f
 		};
+		/*float vertices[4 * 3] = {
+			-1.f, -1.f, 0.f,
+			1.f, -1.f, 0.f,
+			1.f, 1.f, 0.f,
+			-1.f, 1.f, 0.f
+		};*/
 		::glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		::glEnableVertexAttribArray(0);
@@ -74,13 +81,49 @@ namespace Beryllium
 		unsigned int indices[3] = {
 			0, 1, 2
 		};
+		 /*unsigned int indices[3 * 2] = {
+			0, 1, 2,
+			0, 2, 3
+		};*/
 		::glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+		std::string vertexSrc = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 i_Position;
+			out vec3 t_Position;
+
+			void main()
+			{
+				gl_Position = vec4(i_Position, 1.0);
+				t_Position = i_Position; 
+			}
+		)";
+		std::string fragmentSrc = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 o_Color;
+			in vec3 t_Position;
+
+			vec4 remap(vec4 _val, vec2 _min, vec2 _max)
+			{
+				return _max.x + (_val - _min.x) * (_max.y -  _max.x) / (_min.y - _min.x);
+			}
+
+			void main()
+			{
+				o_Color = vec4(0.8, 0.2, 0.3, 0.5);
+				o_Color = remap(vec4(t_Position, 0.5), vec2(-1, 1), vec2(0, 1));
+			}
+		)";
+
+		m_shader = std::make_unique<Beryllium::Shader>(vertexSrc, fragmentSrc);
 	};
 
 	Application::~Application()
 	{
-		Beryllium::Logger::Shutdown();
 		m_layerStack.~LayerStack();
+		Beryllium::Logger::Shutdown();
 	}
 
 	Application* Application::Get()
@@ -118,6 +161,8 @@ namespace Beryllium
 		m_layerStack.PopOverlay(_overlay);
 	}
 
+	static const char* current_item = NULL;
+
 	void Application::Run()
 	{
 		while (m_window->IsOpen())
@@ -127,12 +172,15 @@ namespace Beryllium
 			::glClearColor(0.f, .63f, .56f, 1.f);
 			::glClear(GL_COLOR_BUFFER_BIT);
 
+			m_shader->Bind();
+
 			auto [width, height] = m_window->GetSize();
 			::glViewport(0, 0, width, height);
 
 			//TODO: move to dedicated
 			::glBindVertexArray(m_vertexArray);
 			::glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+			//::glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, nullptr);
 
 			for (Beryllium::Layer* layer : m_layerStack)
 			{
@@ -141,14 +189,47 @@ namespace Beryllium
 
 			m_ImGuiLayer->Begin();
 			{
-				if (showDemo) {
+				if (showDemo) 
+				{
 					ImGui::ShowDemoWindow(&showDemo);
 				}
-
 
 				{
 					ImGui::Begin("Debug Info");
 					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+					{
+						//change fill mode for OpenGL Polygons 
+						if (ImGui::BeginCombo("Render Mode", current_item))
+						{
+							if (ImGui::Selectable("Point", current_item == "Point")) {
+								current_item = "Point";
+								::glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+							}
+							if (current_item == "Point")
+							{
+								ImGui::SetItemDefaultFocus();
+							}
+
+							if (ImGui::Selectable("Wire Frame", current_item == "WireFrame")) {
+								current_item = "WireFrame";
+								::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+							}
+							if (current_item == "WireFrame")
+							{
+								ImGui::SetItemDefaultFocus();
+							}
+							
+							if (ImGui::Selectable("Fill", current_item == "Fill")) {
+								current_item = "Fill";
+								::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+							}
+							if (current_item == "Fill")
+							{
+								ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+					}
 					ImGui::End();
 				}
 			}
@@ -167,10 +248,10 @@ namespace Beryllium
 		else if (_event.Is<Beryllium::Events::WindowFocusChanged>())
 		{
 			if (_event.As<Beryllium::Events::WindowFocusChanged>().IsFocused()) {
-				BE_TRACE("[Window] Get focus");
+				BE_TRACE("[System][Window] Get focus");
 			}
 			else {
-				BE_TRACE("[Window] Lost focus");
+				BE_TRACE("[System][Window] Lost focus");
 			}
 		}
 

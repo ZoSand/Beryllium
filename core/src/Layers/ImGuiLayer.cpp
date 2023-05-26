@@ -42,6 +42,7 @@ namespace Beryllium
 		}
 
 		SetDarkThemeColors();
+		SetRounding();
 
 		Application* app = Application::Get();
 		Window* window = const_cast<Window*>(app->GetWindow());
@@ -135,6 +136,18 @@ namespace Beryllium
 		colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+	}
+
+	void ImGuiLayer::SetRounding()
+	{
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowRounding = 0.f;
+		style.ChildRounding = 0.f;
+		style.FrameRounding = 0.f;
+		style.PopupRounding = 0.f;
+		style.ScrollbarRounding = 0.f;
+		style.GrabRounding = 0.f;
+		style.TabRounding = 0.f;
 	}
 
 	uint32_t ImGuiLayer::GetActiveWidgetID() const

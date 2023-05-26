@@ -80,7 +80,7 @@ namespace Beryllium
 			::ReleaseDC(m_handle, deviceContext);
 			::DestroyWindow(m_handle);
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
-			Logger::Critical("Failed to choose pixel format");
+			BE_CRITICAL("[System][Window] Failed to choose pixel format");
 			throw std::runtime_error("Failed to choose pixel format");
 		}
 
@@ -89,11 +89,11 @@ namespace Beryllium
 			::ReleaseDC(m_handle, deviceContext);
 			::DestroyWindow(m_handle);
 			::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
-			Logger::Critical("Failed to set pixel format");
+			BE_CRITICAL("[System][Window] Failed to set pixel format");
 			throw std::runtime_error("Failed to set pixel format");
 		}
 
-		::BE_TRACE("[Window] Created");
+		BE_TRACE("[System][Window] Created");
 
 		m_context->Init();
 
@@ -110,7 +110,7 @@ namespace Beryllium
 		::DestroyWindow(m_handle);
 		::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
 
-		BE_TRACE("[Window] Destroyed");
+		BE_TRACE("[System][Window] Destroyed");
 	}
 
 	void WindowsWindow::SetTitle(std::string _title)
@@ -158,7 +158,7 @@ namespace Beryllium
 		::CloseWindow(m_handle);
 		::ShowWindow(m_handle, SW_HIDE);
 
-		BE_TRACE("[Window] Closed");
+		BE_TRACE("[System][Window] Closed");
 	}
 
 	void* WindowsWindow::GetNativeWindow() const
@@ -169,7 +169,8 @@ namespace Beryllium
 	std::pair<float, float> WindowsWindow::GetSize() const
 	{
 		::RECT rect;
-		::GetWindowRect(m_handle, &rect);
+		::GetClientRect(m_handle, &rect);
+
 		return std::make_pair(rect.right - rect.left, rect.bottom - rect.top);
 	}
 

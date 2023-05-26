@@ -1,17 +1,26 @@
 #ifndef BE_APPLICATION_HPP
 #define BE_APPLICATION_HPP
 
+//api
 #	include <Beryllium/API.hpp>
+
+//event system
 #	include <Beryllium/Events/Event.hpp>
 #	include <Beryllium/Events/EventListener.hpp>
 
+//IO
 #	include <Beryllium/Window.hpp>
 #	include <Beryllium/Keyboard.hpp>
 #	include <Beryllium/Mouse.hpp>
 
+//layers
 #	include <Beryllium/Layer.hpp>
 #	include <Beryllium/LayerStack.hpp>
 
+//rendering
+#	include <Beryllium/Renderer/Shader.hpp>
+
+//specific code
 #	include <Beryllium/Layers/ImGuiLayer.hpp>
 
 #	include <string>
@@ -72,6 +81,7 @@ namespace Beryllium
 
 		//TODO: define classes
 		unsigned int m_vertexArray, m_vertexBuffer, m_indexBuffer;
+		std::unique_ptr<Beryllium::Shader> m_shader;
 
 		static void Set(Application* _application);
 
