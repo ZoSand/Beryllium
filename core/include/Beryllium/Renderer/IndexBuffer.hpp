@@ -9,12 +9,16 @@ namespace Beryllium
 	class BE_API IndexBuffer
 	{
 	public:
+		IndexBuffer(uint32_t _count);
 		virtual ~IndexBuffer();
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		static IndexBuffer* Create(uint32_t* _indices, uint32_t _size);
+		uint32_t GetCount() const;
+	protected: 
+		unsigned int m_rendererId;
+		uint32_t m_count;
 	};
 }
 

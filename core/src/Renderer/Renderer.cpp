@@ -2,16 +2,14 @@
 
 namespace Beryllium
 {
-
-	RenderApi Renderer::GetRenderApi()
+	void Renderer::Set(Renderer* _api)
 	{
-		return s_renderApi;
+		s_renderer.reset(_api);
 	}
 
-	void Renderer::SetRenderApi(RenderApi _api)
+	Renderer* Renderer::Get()
 	{
-		s_renderApi = _api;
+		return s_renderer.get();
 	}
-
-	RenderApi Renderer::s_renderApi = RenderApi::None;
+	std::unique_ptr<Renderer> Renderer::s_renderer = nullptr;
 }

@@ -2,6 +2,11 @@
 #include <Beryllium/Logger.hpp>
 #include <Beryllium/Events/CommonEvents.hpp>
 
+#include <Beryllium/Renderer/Renderer.hpp>
+#include <Beryllium/Renderer/BufferLayout.hpp>
+
+#include <Beryllium/Platforms/OpenGL/OpenGLRenderer.hpp>
+
 #include <iostream>
 #include <string>
 
@@ -17,9 +22,6 @@
 #	endif
 
 #include <glad/glad.h>
-
-//TODO: remove
-bool showDemo = true;
 
 namespace Beryllium
 {
@@ -39,53 +41,55 @@ namespace Beryllium
 
 		Application::Set(this);
 
+		//TODO: move to ApplicationSpecs
+		//TODO: OpenGLRenderer and link specs
+		//if renderer is not set by user, use OpenGL by default
+		if (Renderer::Get() == nullptr)
+		{
+			Renderer::Set(new OpenGLRenderer());
+		}
+
 		//WARNING: platform specific code 
 #if defined(BE_PLATFORM_WINDOWS)
 		m_window = std::make_unique<WindowsWindow>(_specs.name, 1280, 720);
 #else
 #	error "Beryllium is missing a window for this platform"
 #endif
+
 		m_window->AddListener(this);
+
+		m_context.reset(Renderer::Get()->CreateGraphicsContext(m_window.get()));
+		m_context->Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//                                                    RENDERER            STUFF                                                     //
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//TODO: move to dedicated VertexArray
 		::glGenVertexArrays(1, &m_vertexArray);
 		::glBindVertexArray(m_vertexArray);
 
-		//TODO: move to dedicated VertexBuffer
-		::glGenBuffers(1, &m_vertexBuffer);
-		::glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-
+		//TODO: should be generated
 		float vertices[3 * 3] = {
 			-.5f, -.5f, 0.f,
 			.5f, -.5f, 0.f,
 			0.f, .5f, 0.f
+		};
+		uint32_t indices[3] = {
+			0, 1, 2
 		};
 		/*float vertices[4 * 3] = {
 			-1.f, -1.f, 0.f,
 			1.f, -1.f, 0.f,
 			1.f, 1.f, 0.f,
 			-1.f, 1.f, 0.f
-		};*/
-		::glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		::glEnableVertexAttribArray(0);
-		::glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-
-		//TODO: move to dedicated IndexBuffer
-		::glGenBuffers(1, &m_indexBuffer);
-		::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
-
-		unsigned int indices[3] = {
-			0, 1, 2
 		};
-		 /*unsigned int indices[3 * 2] = {
+		uint32_t indices[3 * 2] = {
 			0, 1, 2,
 			0, 2, 3
 		};*/
-		::glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 		std::string vertexSrc = R"(
 			#version 330 core
@@ -116,14 +120,26 @@ namespace Beryllium
 				o_Color = remap(vec4(t_Position, 0.5), vec2(-1, 1), vec2(0, 1));
 			}
 		)";
+		//END OF TODO
 
-		m_shader = std::make_unique<Beryllium::Shader>(vertexSrc, fragmentSrc);
+
+		//setting up buffer layout
+		BufferLayout layout = {
+			{ ShaderDataType::Float3, "i_Position" }
+		};
+
+		m_vertexBuffer.reset(Renderer::Get()->CreateVertexBuffer(vertices, sizeof(vertices) / sizeof(float)));
+		m_vertexBuffer->SetLayout(layout);
+
+		m_indexBuffer.reset(Renderer::Get()->CreateIndexBuffer(indices, sizeof(indices) / sizeof(uint32_t)));
+		m_shader.reset(Renderer::Get()->CreateShader(vertexSrc, fragmentSrc));
 	};
 
 	Application::~Application()
 	{
+		m_context->Destroy();
 		m_layerStack.~LayerStack();
-		Beryllium::Logger::Shutdown();
+		Logger::Shutdown();
 	}
 
 	Application* Application::Get()
@@ -161,26 +177,23 @@ namespace Beryllium
 		m_layerStack.PopOverlay(_overlay);
 	}
 
-	static const char* current_item = NULL;
+	static const char* current_item = "Fill";
 
 	void Application::Run()
 	{
 		while (m_window->IsOpen())
 		{
 			m_window->OnUpdate();
-			//TODO: move to dedicated
-			::glClearColor(0.f, .63f, .56f, 1.f);
-			::glClear(GL_COLOR_BUFFER_BIT);
+			//swap buffers
+			m_context->SwapBuffers();
+
+			Renderer::Get()->Clear();
 
 			m_shader->Bind();
 
-			auto [width, height] = m_window->GetSize();
-			::glViewport(0, 0, width, height);
-
 			//TODO: move to dedicated
 			::glBindVertexArray(m_vertexArray);
-			::glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
-			//::glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, nullptr);
+			::glDrawElements(GL_TRIANGLES, m_indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Beryllium::Layer* layer : m_layerStack)
 			{
@@ -189,11 +202,6 @@ namespace Beryllium
 
 			m_ImGuiLayer->Begin();
 			{
-				if (showDemo) 
-				{
-					ImGui::ShowDemoWindow(&showDemo);
-				}
-
 				{
 					ImGui::Begin("Debug Info");
 					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -218,7 +226,7 @@ namespace Beryllium
 							{
 								ImGui::SetItemDefaultFocus();
 							}
-							
+
 							if (ImGui::Selectable("Fill", current_item == "Fill")) {
 								current_item = "Fill";
 								::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -253,6 +261,12 @@ namespace Beryllium
 			else {
 				BE_TRACE("[System][Window] Lost focus");
 			}
+		}
+
+		else if (_event.Is<Beryllium::Events::WindowResized>())
+		{
+			auto [width, height] = m_window->GetSize();
+			::glViewport(0, 0, width, height);
 		}
 
 		for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); ++it)

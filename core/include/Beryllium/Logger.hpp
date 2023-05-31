@@ -46,7 +46,7 @@ namespace Beryllium
 		template <typename... Args>
 		static void Print(const std::string _message, Args... args);
 
-		//release and dist builds will write to a file instead of the console
+		//release and dist builds will write to a file instead of the console, we need to keep track of everything
 		static std::streambuf* s_outBuffer;
 		static std::streambuf* s_errBuffer;
 		static std::ofstream* s_outStream;

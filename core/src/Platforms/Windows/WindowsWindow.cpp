@@ -61,8 +61,6 @@ namespace Beryllium
 			throw std::runtime_error("Failed to create window");
 		}
 
-		m_context = new Beryllium::OpenGLContext(this);
-
 		pfd.nSize = sizeof(pfd);
 		pfd.nVersion = 1;
 		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
@@ -95,8 +93,6 @@ namespace Beryllium
 
 		BE_TRACE("[System][Window] Created");
 
-		m_context->Init();
-
 		::ShowWindow(m_handle, SW_SHOW);
 		::SetForegroundWindow(m_handle);
 		::SetFocus(m_handle);
@@ -104,9 +100,6 @@ namespace Beryllium
 
 	WindowsWindow::~WindowsWindow()
 	{
-		m_context->Destroy();
-		delete m_context;
-
 		::DestroyWindow(m_handle);
 		::UnregisterClassA(BE_WINDOW_CLASS_NAME, ::GetModuleHandleA(nullptr));
 
@@ -143,9 +136,6 @@ namespace Beryllium
 			::TranslateMessage(&msg);
 			::DispatchMessageA(&msg);
 		}
-
-		//swap buffers
-		m_context->SwapBuffers();
 	}
 
 	bool WindowsWindow::IsOpen() const

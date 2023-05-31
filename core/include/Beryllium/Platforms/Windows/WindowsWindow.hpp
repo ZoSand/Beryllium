@@ -30,8 +30,6 @@ namespace Beryllium
 	private:
 		::HWND m_handle = nullptr;
 
-		Beryllium::GraphicsContext* m_context;
-
 		static ::LRESULT CALLBACK WndProc(HWND _hwnd, UINT _msg, WPARAM _wParam, LPARAM _lParam);
 	};
 }

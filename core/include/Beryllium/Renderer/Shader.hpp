@@ -10,13 +10,12 @@ namespace Beryllium
 	class BE_API Shader 
 	{
 	public:
-		Shader(const std::string& _vertexSrc, const std::string& _fragmentSrc);
-		~Shader();
+		virtual ~Shader();
 
-		void Bind() const;
-		void Unbind() const;
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
 	
-	private:
+	protected:
 		unsigned int m_rendererId;
 	};
 }
