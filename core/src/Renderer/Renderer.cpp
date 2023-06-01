@@ -2,6 +2,8 @@
 
 namespace Beryllium
 {
+	std::unique_ptr<Renderer> Renderer::s_renderer = nullptr;
+	
 	void Renderer::Set(Renderer* _api)
 	{
 		s_renderer.reset(_api);
@@ -11,5 +13,39 @@ namespace Beryllium
 	{
 		return s_renderer.get();
 	}
-	std::unique_ptr<Renderer> Renderer::s_renderer = nullptr;
+	
+	GraphicsContext* Renderer::CreateGraphicsContext(Window* _window)
+	{
+		return s_renderer->CreateGraphicsContextImpl(_window);
+	}
+	
+	Shader* Renderer::CreateShader(const std::string& _vertexSrc, const std::string& _fragmentSrc)
+	{
+		return s_renderer->CreateShaderImpl(_vertexSrc, _fragmentSrc);
+	}
+	
+	IndexBuffer* Renderer::CreateIndexBuffer(uint32_t* _indices, uint32_t _count)
+	{
+		return s_renderer->CreateIndexBufferImpl(_indices, _count);
+	}
+
+	VertexBuffer* Renderer::CreateVertexBuffer(float* _indices, uint32_t _count)
+	{
+		return s_renderer->CreateVertexBufferImpl(_indices, _count);
+	}
+
+	VertexArray* Renderer::CreateVertexArray()
+	{
+		return s_renderer->CreateVertexArrayImpl();
+	}
+	
+	void Renderer::Clear()
+	{
+		s_renderer->ClearImpl();
+	}
+
+	void Renderer::SetViewport(std::pair<float, float> _size)
+	{
+		s_renderer->SetViewportImpl(_size);
+	}
 }

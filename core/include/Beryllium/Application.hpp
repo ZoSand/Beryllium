@@ -19,9 +19,8 @@
 
 //rendering
 #	include <Beryllium/Renderer/Shader.hpp>
-#	include <Beryllium/Renderer/VertexBuffer.hpp>
-#	include <Beryllium/Renderer/IndexBuffer.hpp>
 #	include <Beryllium/Renderer/GraphicsContext.hpp>
+#	include <Beryllium/Renderer/VertexArray.hpp>
 
 //specific code
 #	include <Beryllium/Layers/ImGuiLayer.hpp>
@@ -83,12 +82,10 @@ namespace Beryllium
 		Beryllium::ImGuiLayer* m_ImGuiLayer;
 
 		//TODO: define classes
-		unsigned int m_vertexArray;
-		std::unique_ptr<Beryllium::Shader> m_shader;
-		std::unique_ptr<Beryllium::VertexBuffer> m_vertexBuffer;
-		std::unique_ptr<Beryllium::IndexBuffer> m_indexBuffer;
+		std::shared_ptr<Beryllium::VertexArray> m_vertexArray;
+		std::shared_ptr<Beryllium::Shader> m_shader;
 
-		std::unique_ptr<Beryllium::GraphicsContext> m_context;
+		std::shared_ptr<Beryllium::GraphicsContext> m_context;
 
 		static void Set(Application* _application);
 

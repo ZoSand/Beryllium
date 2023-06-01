@@ -14,7 +14,7 @@ namespace Beryllium
 	class BE_API WindowsWindow : public Beryllium::Window
 	{
 	public:
-		WindowsWindow(const std::string& _title, unsigned int _width, unsigned int _height);
+		WindowsWindow(const std::string& _title, std::pair<float, float> _size);
 		virtual ~WindowsWindow();
 
 		virtual void SetTitle(std::string _title) override;

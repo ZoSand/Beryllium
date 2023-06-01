@@ -13,7 +13,7 @@ namespace Beryllium
 	class BE_API Window : public EventDispatcher
 	{
 	public:
-		Window(const std::string& _title, unsigned int _width, unsigned int _height);
+		Window(const std::string& _title, std::pair<float, float> _size);
 		virtual ~Window() = default;
 
 		Window(const Window&) = delete;

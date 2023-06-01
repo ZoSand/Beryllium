@@ -15,8 +15,6 @@
 
 #	if defined(BE_PLATFORM_WINDOWS)
 #		include <Beryllium/Platforms/Windows/WindowsWindow.hpp>
-//#		include <Beryllium/Platforms/Windows/WindowsKeyboard.hpp>
-//#		include <Beryllium/Platforms/Windows/WindowsMouse.hpp>
 #	else
 #		error "Beryllium Window is only implemented on Windows!"
 #	endif
@@ -30,6 +28,9 @@ namespace Beryllium
 	Application::Application(const Beryllium::ApplicationSpecs& _specs)
 		: m_specs(_specs)
 	{
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		
 		Beryllium::Logger::Init();
 		Beryllium::Logger::SetLevel(LogLevel::Trace);
 
@@ -41,8 +42,6 @@ namespace Beryllium
 
 		Application::Set(this);
 
-		//TODO: move to ApplicationSpecs
-		//TODO: OpenGLRenderer and link specs
 		//if renderer is not set by user, use OpenGL by default
 		if (Renderer::Get() == nullptr)
 		{
@@ -51,14 +50,14 @@ namespace Beryllium
 
 		//WARNING: platform specific code 
 #if defined(BE_PLATFORM_WINDOWS)
-		m_window = std::make_unique<WindowsWindow>(_specs.name, 1280, 720);
+		m_window = std::make_unique<WindowsWindow>(_specs.name, std::make_pair<float, float>(1280, 720));
 #else
 #	error "Beryllium is missing a window for this platform"
 #endif
 
 		m_window->AddListener(this);
 
-		m_context.reset(Renderer::Get()->CreateGraphicsContext(m_window.get()));
+		m_context.reset(Renderer::CreateGraphicsContext(m_window.get()));
 		m_context->Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
@@ -67,10 +66,6 @@ namespace Beryllium
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//                                                    RENDERER            STUFF                                                     //
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//TODO: move to dedicated VertexArray
-		::glGenVertexArrays(1, &m_vertexArray);
-		::glBindVertexArray(m_vertexArray);
-
 		//TODO: should be generated
 		float vertices[3 * 3] = {
 			-.5f, -.5f, 0.f,
@@ -121,18 +116,22 @@ namespace Beryllium
 			}
 		)";
 		//END OF TODO
-
+		
+		m_vertexArray.reset(Renderer::CreateVertexArray());
 
 		//setting up buffer layout
 		BufferLayout layout = {
 			{ ShaderDataType::Float3, "i_Position" }
 		};
 
-		m_vertexBuffer.reset(Renderer::Get()->CreateVertexBuffer(vertices, sizeof(vertices) / sizeof(float)));
-		m_vertexBuffer->SetLayout(layout);
+		vertexBuffer.reset(Renderer::CreateVertexBuffer(vertices, sizeof(vertices) / sizeof(float)));
+		vertexBuffer->SetLayout(layout);
+		m_vertexArray->AddVertexBuffer(vertexBuffer);
 
-		m_indexBuffer.reset(Renderer::Get()->CreateIndexBuffer(indices, sizeof(indices) / sizeof(uint32_t)));
-		m_shader.reset(Renderer::Get()->CreateShader(vertexSrc, fragmentSrc));
+		indexBuffer.reset(Renderer::CreateIndexBuffer(indices, sizeof(indices) / sizeof(uint32_t)));
+		m_vertexArray->SetIndexBuffer(indexBuffer);
+		
+		m_shader.reset(Renderer::CreateShader(vertexSrc, fragmentSrc));
 	};
 
 	Application::~Application()
@@ -187,13 +186,14 @@ namespace Beryllium
 			//swap buffers
 			m_context->SwapBuffers();
 
-			Renderer::Get()->Clear();
+			Renderer::Clear();
 
 			m_shader->Bind();
 
 			//TODO: move to dedicated
-			::glBindVertexArray(m_vertexArray);
-			::glDrawElements(GL_TRIANGLES, m_indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+			m_vertexArray->Bind();
+			
+			::glDrawElements(GL_TRIANGLES, m_vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Beryllium::Layer* layer : m_layerStack)
 			{
@@ -265,8 +265,7 @@ namespace Beryllium
 
 		else if (_event.Is<Beryllium::Events::WindowResized>())
 		{
-			auto [width, height] = m_window->GetSize();
-			::glViewport(0, 0, width, height);
+			Renderer::SetViewport(m_window->GetSize());
 		}
 
 		for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); ++it)

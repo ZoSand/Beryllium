@@ -2,7 +2,7 @@
 
 namespace Beryllium
 {
-	Window::Window(const std::string& _title, unsigned int _width, unsigned int _height)
+	Window::Window(const std::string& _title, std::pair<float, float> _size)
 	{
 	}
 }

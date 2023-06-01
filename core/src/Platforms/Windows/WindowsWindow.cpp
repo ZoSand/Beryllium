@@ -2,7 +2,6 @@
 #include <Beryllium/Logger.hpp>
 
 #include <Beryllium/Events/CommonEvents.hpp>
-#include <Beryllium/Platforms/OpenGL/OpenGLContext.hpp>
 
 #include <imgui.h>
 
@@ -12,13 +11,14 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace Beryllium
 {
-	WindowsWindow::WindowsWindow(const std::string& _title, unsigned int _width, unsigned int _height)
-		: Beryllium::Window(_title, _width, _height)
+	WindowsWindow::WindowsWindow(const std::string& _title, std::pair<float, float> _size)
+		: Beryllium::Window(_title, _size)
 	{
 		::WNDCLASSEXA wcex;
 		::RECT clientRect;
 		::PIXELFORMATDESCRIPTOR pfd;
 		int pixelFormat;
+		auto& [width, height] = _size;
 
 		::ZeroMemory(&wcex, sizeof(wcex));
 		::ZeroMemory(&pfd, sizeof(pfd));
@@ -36,8 +36,8 @@ namespace Beryllium
 
 		clientRect.left = 0;
 		clientRect.top = 0;
-		clientRect.right = _width;
-		clientRect.bottom = _height;
+		clientRect.right = width;
+		clientRect.bottom = height;
 		::AdjustWindowRect(&clientRect, WS_OVERLAPPEDWINDOW, FALSE);
 
 		m_handle = ::CreateWindowExA(
@@ -187,11 +187,6 @@ namespace Beryllium
 				return ::DefWindowProcA(_hwnd, _msg, _wParam, _lParam);
 			}
 		}
-
-
-		//::POINTS mp = MAKEPOINTS(_lParam);
-		//auto offset = GET_WHEEL_DELTA_WPARAM(_wParam);
-		//return (::LRESULT)!wd->eventCallback(MouseButtonReleasedEvent(2, loc.x, loc.y));
 
 		switch (_msg)
 		{

@@ -17,7 +17,7 @@ namespace Beryllium
 		
 		uint32_t GetStride() const;
 		
-		inline const std::vector<BufferElement>& GetElements() const;
+		const std::vector<BufferElement>& GetElements() const;
 
 		std::vector<BufferElement>::iterator begin();
 		std::vector<BufferElement>::iterator end();
