@@ -1,8 +1,25 @@
 #include <Beryllium/Renderer/Renderer.hpp>
+#include <Beryllium/Renderer/RenderCommand.hpp>
 
 namespace Beryllium
 {
 	std::unique_ptr<Renderer> Renderer::s_renderer = nullptr;
+
+	void Renderer::BeginScene()
+	{
+
+	}
+
+	void Renderer::EndScene()
+	{
+
+	}
+
+	void Renderer::Submit(const std::shared_ptr<VertexArray>& _array)
+	{
+		_array->Bind();
+		RenderCommand::DrawIndexed(_array);
+	}
 	
 	void Renderer::Set(Renderer* _api)
 	{
@@ -38,7 +55,7 @@ namespace Beryllium
 	{
 		return s_renderer->CreateVertexArrayImpl();
 	}
-	
+
 	void Renderer::Clear()
 	{
 		s_renderer->ClearImpl();
@@ -47,5 +64,10 @@ namespace Beryllium
 	void Renderer::SetViewport(std::pair<float, float> _size)
 	{
 		s_renderer->SetViewportImpl(_size);
+	}
+
+	void Renderer::DrawIndexed(const std::shared_ptr<VertexArray>& _array)
+	{
+		s_renderer->DrawIndexedImpl(_array);
 	}
 }

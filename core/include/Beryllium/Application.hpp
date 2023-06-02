@@ -83,10 +83,6 @@ namespace Beryllium
 		Beryllium::LayerStack m_layerStack;
 		Beryllium::ImGuiLayer* m_ImGuiLayer;
 
-		//TODO: define classes
-		std::shared_ptr<Beryllium::VertexArray> m_vertexArray;
-		std::shared_ptr<Beryllium::Shader> m_shader;
-
 		std::shared_ptr<Beryllium::GraphicsContext> m_context;
 
 		static void Set(Application* _application);

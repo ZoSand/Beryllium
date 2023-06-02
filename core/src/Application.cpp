@@ -2,10 +2,9 @@
 #include <Beryllium/Logger.hpp>
 #include <Beryllium/Events/CommonEvents.hpp>
 
-#include <Beryllium/Renderer/Renderer.hpp>
 #include <Beryllium/Renderer/BufferLayout.hpp>
-
-#include <Beryllium/Platforms/OpenGL/OpenGLRenderer.hpp>
+#include <Beryllium/Renderer/Renderer.hpp>
+#include <Beryllium/Renderer/RenderCommand.hpp>
 
 #include <iostream>
 #include <string>
@@ -19,7 +18,7 @@
 #		error "Beryllium Window is only implemented on Windows!"
 #	endif
 
-#include <glad/glad.h>
+//#include <glad/glad.h>
 
 namespace Beryllium
 {
@@ -28,22 +27,18 @@ namespace Beryllium
 	Application::Application(const Beryllium::ApplicationSpecs& _specs)
 		: m_specs(_specs)
 	{
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		
 		Beryllium::Logger::Init();
-		Beryllium::Logger::SetLevel(LogLevel::Trace);
 
 		if (Application::Get() != nullptr)
 		{
-			BE_CRITICAL("[Core][Application] Only one application can be created at a time");
+			BE_CRITICAL("[System][Application] Only one application can be created at a time");
 			throw std::runtime_error("Only one application can be created at a time");
 		}
 
 		//if renderer is not set by user, use OpenGL by default
 		if (_specs.renderer == nullptr)
 		{
-			BE_CRITICAL("[Core][Application] A renderer needs to be set in Application Specs");
+			BE_CRITICAL("[System][Application] A renderer needs to be set in Application Specs");
 			throw std::runtime_error("A renderer needs to be set in Application Specs");
 		}
 
@@ -64,76 +59,6 @@ namespace Beryllium
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
-
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//                                                    RENDERER            STUFF                                                     //
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//TODO: should be generated
-		float vertices[3 * 3] = {
-			-.5f, -.5f, 0.f,
-			.5f, -.5f, 0.f,
-			0.f, .5f, 0.f
-		};
-		uint32_t indices[3] = {
-			0, 1, 2
-		};
-		/*float vertices[4 * 3] = {
-			-1.f, -1.f, 0.f,
-			1.f, -1.f, 0.f,
-			1.f, 1.f, 0.f,
-			-1.f, 1.f, 0.f
-		};
-		uint32_t indices[3 * 2] = {
-			0, 1, 2,
-			0, 2, 3
-		};*/
-
-		std::string vertexSrc = R"(
-			#version 330 core
-
-			layout(location = 0) in vec3 i_Position;
-			out vec3 t_Position;
-
-			void main()
-			{
-				gl_Position = vec4(i_Position, 1.0);
-				t_Position = i_Position; 
-			}
-		)";
-		std::string fragmentSrc = R"(
-			#version 330 core
-
-			layout(location = 0) out vec4 o_Color;
-			in vec3 t_Position;
-
-			vec4 remap(vec4 _val, vec2 _min, vec2 _max)
-			{
-				return _max.x + (_val - _min.x) * (_max.y -  _max.x) / (_min.y - _min.x);
-			}
-
-			void main()
-			{
-				o_Color = vec4(0.8, 0.2, 0.3, 0.5);
-				o_Color = remap(vec4(t_Position, 0.5), vec2(-1, 1), vec2(0, 1));
-			}
-		)";
-		//END OF TODO
-		
-		m_vertexArray.reset(Renderer::CreateVertexArray());
-
-		//setting up buffer layout
-		BufferLayout layout = {
-			{ ShaderDataType::Float3, "i_Position" }
-		};
-
-		vertexBuffer.reset(Renderer::CreateVertexBuffer(vertices, sizeof(vertices) / sizeof(float)));
-		vertexBuffer->SetLayout(layout);
-		m_vertexArray->AddVertexBuffer(vertexBuffer);
-
-		indexBuffer.reset(Renderer::CreateIndexBuffer(indices, sizeof(indices) / sizeof(uint32_t)));
-		m_vertexArray->SetIndexBuffer(indexBuffer);
-		
-		m_shader.reset(Renderer::CreateShader(vertexSrc, fragmentSrc));
 	};
 
 	Application::~Application()
@@ -188,14 +113,8 @@ namespace Beryllium
 			//swap buffers
 			m_context->SwapBuffers();
 
-			Renderer::Clear();
-
-			m_shader->Bind();
-
-			//TODO: move to dedicated
-			m_vertexArray->Bind();
-			
-			::glDrawElements(GL_TRIANGLES, m_vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::BeginScene();
+			RenderCommand::Clear();
 
 			for (Beryllium::Layer* layer : m_layerStack)
 			{
@@ -206,8 +125,10 @@ namespace Beryllium
 			{
 				{
 					ImGui::Begin("Debug Info");
-					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+					ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+					ImGui::Text("Active Renderer: %s", std::string(typeid(*Renderer::Get()).name()).substr(std::string("class Beryllium::").length()).c_str());
 					{
+					/*
 						//change fill mode for OpenGL Polygons 
 						if (ImGui::BeginCombo("Render Mode", current_item))
 						{
@@ -239,11 +160,14 @@ namespace Beryllium
 							}
 							ImGui::EndCombo();
 						}
+					*/
 					}
 					ImGui::End();
 				}
 			}
 			m_ImGuiLayer->End();
+
+			Renderer::EndScene();
 		}
 	}
 

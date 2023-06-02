@@ -18,6 +18,12 @@ namespace Beryllium
 	class BE_API Renderer
 	{
 	public:
+		//commands
+		static void BeginScene();
+		static void EndScene();
+		static void Submit(const std::shared_ptr<VertexArray>& _array);
+
+		//misc
 		static void Set(Renderer* _api);
 		static Renderer* Get();
 
@@ -30,6 +36,8 @@ namespace Beryllium
 		static void Clear();
 		static void SetViewport(std::pair<float, float> _size);
 		
+		static void DrawIndexed(const std::shared_ptr<VertexArray>& _array);
+
 	protected:
 		virtual GraphicsContext* CreateGraphicsContextImpl(Window* _window) = 0;
 		virtual Shader* CreateShaderImpl(const std::string& _vertexSrc, const std::string& _fragmentSrc) = 0;
@@ -37,8 +45,11 @@ namespace Beryllium
 		virtual VertexBuffer* CreateVertexBufferImpl(float* _indices, uint32_t _count) = 0;
 		virtual VertexArray* CreateVertexArrayImpl() = 0;
 
+		//TODO: clear color
 		virtual void ClearImpl() = 0;
 		virtual void SetViewportImpl(std::pair<float, float> _size) = 0;
+
+		virtual void DrawIndexedImpl(const std::shared_ptr<VertexArray>& _array) = 0;
 
 	private:
 		static std::unique_ptr<Renderer> s_renderer;

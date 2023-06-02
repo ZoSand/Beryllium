@@ -19,6 +19,8 @@ namespace Beryllium
 
 		virtual void ClearImpl() override;
 		virtual void SetViewportImpl(std::pair<float, float> _size) override;
+
+		virtual void DrawIndexedImpl(const std::shared_ptr<VertexArray>& _vertexArray) override;
 	};
 }
 
