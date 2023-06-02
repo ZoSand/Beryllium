@@ -8,6 +8,9 @@
 
 namespace Beryllium
 {
+	/// <summary>
+	/// Shader variable element description for declaring layout
+	/// </summary>
 	struct BE_API BufferElement
 	{
 		std::string name;

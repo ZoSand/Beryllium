@@ -11,7 +11,7 @@ namespace Beryllium
 {
 
 	OpenGLGraphicsContext::OpenGLGraphicsContext(Beryllium::Window* _window)
-		: m_windowHandle(_window)
+		: GraphicsContext(_window)
 		, m_context(nullptr)
 	{
 	}

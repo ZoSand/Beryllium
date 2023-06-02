@@ -10,8 +10,6 @@
 
 namespace Beryllium
 {
-	class Window;
-
 	class BE_API OpenGLGraphicsContext : public Beryllium::GraphicsContext
 	{
 	public:
@@ -20,9 +18,6 @@ namespace Beryllium
 		virtual void Init() override;
 		virtual void SwapBuffers() override;
 		virtual void Destroy() override;
-
-	private: 
-		Beryllium::Window* m_windowHandle;
 
 #if defined(BE_PLATFORM_WINDOWS)
 		::HGLRC m_context;

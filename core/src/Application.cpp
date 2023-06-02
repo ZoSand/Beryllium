@@ -36,17 +36,19 @@ namespace Beryllium
 
 		if (Application::Get() != nullptr)
 		{
-			BE_CRITICAL("Only one application can be created at a time");
+			BE_CRITICAL("[Core][Application] Only one application can be created at a time");
 			throw std::runtime_error("Only one application can be created at a time");
 		}
 
-		Application::Set(this);
-
 		//if renderer is not set by user, use OpenGL by default
-		if (Renderer::Get() == nullptr)
+		if (_specs.renderer == nullptr)
 		{
-			Renderer::Set(new OpenGLRenderer());
+			BE_CRITICAL("[Core][Application] A renderer needs to be set in Application Specs");
+			throw std::runtime_error("A renderer needs to be set in Application Specs");
 		}
+
+		Application::Set(this);
+		Renderer::Set(_specs.renderer);
 
 		//WARNING: platform specific code 
 #if defined(BE_PLATFORM_WINDOWS)

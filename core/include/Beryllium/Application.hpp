@@ -21,6 +21,7 @@
 #	include <Beryllium/Renderer/Shader.hpp>
 #	include <Beryllium/Renderer/GraphicsContext.hpp>
 #	include <Beryllium/Renderer/VertexArray.hpp>
+#	include <Beryllium/Renderer/Renderer.hpp>
 
 //specific code
 #	include <Beryllium/Layers/ImGuiLayer.hpp>
@@ -39,6 +40,7 @@ namespace Beryllium
 	{
 		std::string name;
 		Beryllium::CmdArgs args;
+		Beryllium::Renderer* renderer;
 	};
 
 	class BE_API Application : public Beryllium::EventListener
