@@ -1,8 +1,8 @@
 #include <Beryllium/Platforms/OpenGL/OpenGLShader.hpp>
-
 #include <Beryllium/Logger.hpp>
 
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
 
@@ -139,5 +139,17 @@ namespace Beryllium
 	void OpenGLShader::Unbind() const
 	{
 		::glUseProgram(0);
+	}
+
+	void OpenGLShader::SetUniform(const std::string& _name, const glm::mat4& _mat)
+	{
+		int location = ::glGetUniformLocation(m_rendererId, _name.c_str());
+		if (location == -1)
+		{
+			BE_ERROR("[OpenGL][Shader] Uniform %s Not found for program {%u}", _name.c_str(), m_rendererId);
+		//	throw std::runtime_error("Location not found");
+		}
+
+		::glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(_mat));
 	}
 }

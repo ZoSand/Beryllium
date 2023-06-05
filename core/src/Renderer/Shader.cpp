@@ -11,5 +11,4 @@
 namespace Beryllium
 {
 	Shader::~Shader(){}
-
 }

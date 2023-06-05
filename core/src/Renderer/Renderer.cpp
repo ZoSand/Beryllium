@@ -4,10 +4,11 @@
 namespace Beryllium
 {
 	std::unique_ptr<Renderer> Renderer::s_renderer = nullptr;
+	Renderer::SceneData* Renderer::s_sceneData = new SceneData();
 
-	void Renderer::BeginScene()
+	void Renderer::BeginScene(const OrthographicCamera& _cam)
 	{
-
+		s_sceneData->vpMatrix = _cam.GetViewProjectionMatrix();
 	}
 
 	void Renderer::EndScene()
@@ -15,8 +16,11 @@ namespace Beryllium
 
 	}
 
-	void Renderer::Submit(const std::shared_ptr<VertexArray>& _array)
+	void Renderer::Submit(const std::shared_ptr<VertexArray>& _array, const std::shared_ptr<Shader>& _shader)
 	{
+		_shader->Bind();
+		_shader->SetUniform("u_ViewProjection", s_sceneData->vpMatrix);
+		
 		_array->Bind();
 		RenderCommand::DrawIndexed(_array);
 	}

@@ -91,7 +91,7 @@ namespace Beryllium
 		virtual bool OnEvent(Beryllium::Event& _event) override;
 	};
 
-	Application* CreateApplication(CmdArgs _args);
+	Beryllium::Application* CreateApplication(Beryllium::CmdArgs _args);
 }
 
 #endif // BE_APPLICATION_HPP

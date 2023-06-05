@@ -10,6 +10,7 @@
 #	include <Beryllium/Renderer/Shader.hpp>
 #	include <Beryllium/Renderer/VertexBuffer.hpp>
 #	include <Beryllium/Renderer/VertexArray.hpp>
+#	include <Beryllium/Renderer/OrthographicCamera.hpp>
 
 #	include <memory>
 
@@ -19,9 +20,9 @@ namespace Beryllium
 	{
 	public:
 		//commands
-		static void BeginScene();
+		static void BeginScene(const OrthographicCamera& _cam);
 		static void EndScene();
-		static void Submit(const std::shared_ptr<VertexArray>& _array);
+		static void Submit(const std::shared_ptr<VertexArray>& _array, const std::shared_ptr<Shader>& _shader);
 
 		//misc
 		static void Set(Renderer* _api);
@@ -53,6 +54,13 @@ namespace Beryllium
 
 	private:
 		static std::unique_ptr<Renderer> s_renderer;
+
+		struct SceneData
+		{
+			glm::mat4 vpMatrix;
+		};
+
+		static SceneData* s_sceneData;
 
 	};
 

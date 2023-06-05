@@ -1,5 +1,6 @@
 #include <Beryllium/Application.hpp>
 #include <Beryllium/Logger.hpp>
+#include <Beryllium/Time.hpp>
 #include <Beryllium/Events/CommonEvents.hpp>
 
 #include <Beryllium/Renderer/BufferLayout.hpp>
@@ -22,14 +23,14 @@
 
 namespace Beryllium
 {
-	Application* Application::s_application = nullptr;
+	Beryllium::Application* Beryllium::Application::s_application = nullptr;
 
-	Application::Application(const Beryllium::ApplicationSpecs& _specs)
+	Beryllium::Application::Application(const Beryllium::ApplicationSpecs& _specs)
 		: m_specs(_specs)
 	{
 		Beryllium::Logger::Init();
 
-		if (Application::Get() != nullptr)
+		if (Beryllium::Application::Get() != nullptr)
 		{
 			BE_CRITICAL("[System][Application] Only one application can be created at a time");
 			throw std::runtime_error("Only one application can be created at a time");
@@ -42,83 +43,86 @@ namespace Beryllium
 			throw std::runtime_error("A renderer needs to be set in Application Specs");
 		}
 
-		Application::Set(this);
-		Renderer::Set(_specs.renderer);
+		Beryllium::Application::Set(this);
+		Beryllium::Renderer::Set(_specs.renderer);
 
 		//WARNING: platform specific code 
 #if defined(BE_PLATFORM_WINDOWS)
-		m_window = std::make_unique<WindowsWindow>(_specs.name, std::make_pair<float, float>(1280, 720));
+		m_window = std::make_unique<Beryllium::WindowsWindow>(_specs.name, std::make_pair<float, float>(1280, 720));
 #else
 #	error "Beryllium is missing a window for this platform"
 #endif
 
 		m_window->AddListener(this);
 
-		m_context.reset(Renderer::CreateGraphicsContext(m_window.get()));
+		m_context.reset(Beryllium::Renderer::CreateGraphicsContext(m_window.get()));
 		m_context->Init();
 
-		m_ImGuiLayer = new ImGuiLayer();
+		m_ImGuiLayer = new Beryllium::ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 	};
 
-	Application::~Application()
+	Beryllium::Application::~Application()
 	{
 		m_context->Destroy();
 		m_layerStack.~LayerStack();
-		Logger::Shutdown();
+		Beryllium::Logger::Shutdown();
 	}
 
-	Application* Application::Get()
+	Beryllium::Application* Beryllium::Application::Get()
 	{
 		return s_application;
 	}
 
-	void Application::Set(Application* _app)
+	void Beryllium::Application::Set(Beryllium::Application* _app)
 	{
 		s_application = _app;
 	}
 
-	const Beryllium::Window* Application::GetWindow() const
+	const Beryllium::Window* Beryllium::Application::GetWindow() const
 	{
 		return m_window.get();
 	}
 
-	void Application::PushLayer(Beryllium::Layer* _layer)
+	void Beryllium::Application::PushLayer(Beryllium::Layer* _layer)
 	{
 		m_layerStack.PushLayer(_layer);
 	}
 
-	void Application::PushOverlay(Beryllium::Layer* _overlay)
+	void Beryllium::Application::PushOverlay(Beryllium::Layer* _overlay)
 	{
 		m_layerStack.PushOverlay(_overlay);
 	}
 
-	void Application::PopLayer(Beryllium::Layer* _layer)
+	void Beryllium::Application::PopLayer(Beryllium::Layer* _layer)
 	{
 		m_layerStack.PopLayer(_layer);
 	}
 
-	void Application::PopOverlay(Beryllium::Layer* _overlay)
+	void Beryllium::Application::PopOverlay(Beryllium::Layer* _overlay)
 	{
 		m_layerStack.PopOverlay(_overlay);
 	}
 
 	static const char* current_item = "Fill";
 
-	void Application::Run()
+	void Beryllium::Application::Run()
 	{
 		while (m_window->IsOpen())
 		{
-			m_window->OnUpdate();
-			//swap buffers
-			m_context->SwapBuffers();
+			Beryllium::Time::Tick();
 
-			Renderer::BeginScene();
-			RenderCommand::Clear();
+			Beryllium::RenderCommand::Clear();
+			m_window->OnUpdate();
 
 			for (Beryllium::Layer* layer : m_layerStack)
 			{
 				layer->OnUpdate();
+			}
+
+			for (Beryllium::Layer* layer : m_layerStack)
+			{
+				layer->OnRender();
 			}
 
 			m_ImGuiLayer->Begin();
@@ -126,7 +130,7 @@ namespace Beryllium
 				{
 					ImGui::Begin("Debug Info");
 					ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-					ImGui::Text("Active Renderer: %s", std::string(typeid(*Renderer::Get()).name()).substr(std::string("class Beryllium::").length()).c_str());
+					ImGui::Text("Active Renderer: %s", std::string(typeid(*Beryllium::Renderer::Get()).name()).substr(std::string("class Beryllium::").length()).c_str());
 					{
 					/*
 						//change fill mode for OpenGL Polygons 
@@ -167,11 +171,12 @@ namespace Beryllium
 			}
 			m_ImGuiLayer->End();
 
-			Renderer::EndScene();
+			//at the end of rendering, swap buffers
+			m_context->SwapBuffers();
 		}
 	}
 
-	bool Application::OnEvent(Beryllium::Event& _event)
+	bool Beryllium::Application::OnEvent(Beryllium::Event& _event)
 	{
 		//BE_TRACE("Event: %s", typeid(_event).name());
 		if (_event.Is<Beryllium::Events::WindowClosed>())
@@ -191,7 +196,8 @@ namespace Beryllium
 
 		else if (_event.Is<Beryllium::Events::WindowResized>())
 		{
-			Renderer::SetViewport(m_window->GetSize());
+			auto& [w, h] = m_window->GetSize();
+			Beryllium::Renderer::SetViewport({ w, h });
 		}
 
 		for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); ++it)

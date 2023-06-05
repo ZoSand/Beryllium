@@ -58,7 +58,7 @@ namespace Beryllium
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
 	}
-
+	
 	bool ImGuiLayer::OnEvent(Event& e)
 	{
 		if (m_BlockEvents)

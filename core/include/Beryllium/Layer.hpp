@@ -15,7 +15,8 @@ namespace Beryllium
 		virtual void OnAttach();
 		virtual void OnDetach();
 		virtual void OnUpdate();
-		virtual bool OnEvent(Event& _event) override;
+		virtual void OnRender();
+		virtual bool OnEvent(Beryllium::Event& _event) override;
 	};
 }
 

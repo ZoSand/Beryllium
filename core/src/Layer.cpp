@@ -17,6 +17,10 @@ namespace Beryllium
 	void Layer::OnUpdate()
 	{}
 
+	void Layer::OnRender()
+	{
+	}
+
 	bool Layer::OnEvent(Event& _event)
 	{
 		return false;

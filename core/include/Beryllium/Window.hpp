@@ -16,11 +16,6 @@ namespace Beryllium
 		Window(const std::string& _title, std::pair<float, float> _size);
 		virtual ~Window() = default;
 
-		Window(const Window&) = delete;
-		Window(const Window&&) = delete;
-		Window& operator=(const Window&) = delete;
-		Window& operator=(const Window&&) = delete;
-
 		virtual void SetTitle(std::string _title) = 0;
 		virtual std::string GetTitle() const = 0;
 

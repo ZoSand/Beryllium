@@ -7,6 +7,9 @@
 // APPLICATION
 #	include <Beryllium/Application.hpp>
 
+// TIME MANAGEMENT
+#	include <Beryllium/Time.hpp>
+
 // CORE
 #	include <Beryllium/Logger.hpp>
 #	include <Beryllium/Window.hpp>
@@ -29,6 +32,7 @@
 #	include <Beryllium/Renderer/ShaderDataType.hpp>
 #	include <Beryllium/Renderer/VertexArray.hpp>
 #	include <Beryllium/Renderer/VertexBuffer.hpp>
+#	include <Beryllium/Renderer/OrthographicCamera.hpp>
 
 // RENDERERS:OPENGL
 #	include <Beryllium/Platforms/OpenGL/OpenGLRenderer.hpp>
