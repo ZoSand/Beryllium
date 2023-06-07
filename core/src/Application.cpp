@@ -60,6 +60,8 @@ namespace Beryllium
 
 		m_ImGuiLayer = new Beryllium::ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+
+		//m_window->SetVSync(false);
 	};
 
 	Beryllium::Application::~Application()
@@ -129,7 +131,8 @@ namespace Beryllium
 			{
 				{
 					ImGui::Begin("Debug Info");
-					ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+					ImGui::Text("ImGui:     %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+					ImGui::Text("Beryllium: %.3f ms/frame (%.1f FPS)", 1000.0f * Beryllium::Time::DeltaTime(), 1.f/Beryllium::Time::DeltaTime());
 					ImGui::Text("Active Renderer: %s", std::string(typeid(*Beryllium::Renderer::Get()).name()).substr(std::string("class Beryllium::").length()).c_str());
 					{
 					/*
@@ -176,6 +179,11 @@ namespace Beryllium
 		}
 	}
 
+	void Application::Quit() const
+	{
+		m_window->DispatchEvent(Beryllium::Events::WindowClosed());
+	}
+
 	bool Beryllium::Application::OnEvent(Beryllium::Event& _event)
 	{
 		//BE_TRACE("Event: %s", typeid(_event).name());
@@ -200,7 +208,7 @@ namespace Beryllium
 			Beryllium::Renderer::SetViewport({ w, h });
 		}
 
-		for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); ++it)
+		for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); it++)
 		{
 			if ((*it)->OnEvent(_event))
 			{

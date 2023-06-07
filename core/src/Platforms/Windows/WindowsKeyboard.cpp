@@ -50,6 +50,10 @@ namespace Beryllium
 		{
 			return ::GetKeyState(VK_END) & (1 << 15);
 		}
+		else if (_key == "escape")
+		{
+			return ::GetKeyState(VK_ESCAPE) & (1 << 15);
+		}
 		else if (_key == "up")
 		{
 			return ::GetKeyState(VK_UP) & (1 << 15);

@@ -73,6 +73,8 @@ namespace Beryllium
 		// run the application
 		void Run();
 
+		void Quit() const;
+
 	private:
 		static Application* s_application;
 

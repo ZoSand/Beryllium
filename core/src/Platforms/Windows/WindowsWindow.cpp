@@ -9,6 +9,8 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+#include <glad/glad.h>
+
 namespace Beryllium
 {
 	WindowsWindow::WindowsWindow(const std::string& _title, std::pair<float, float> _size)
@@ -149,6 +151,26 @@ namespace Beryllium
 		::ShowWindow(m_handle, SW_HIDE);
 
 		BE_TRACE("[System][Window] Closed");
+	}
+
+	void WindowsWindow::SetVSync(bool _enable)
+	{
+		typedef BOOL(APIENTRY* PFNWGLSWAPINTERVALPROC)(int);
+		PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
+
+		const char* extensions = (char*)::glGetString(GL_EXTENSIONS); //TODO: remove dat
+
+		if (strstr(extensions, "WGL_EXT_swap_control") == 0)
+		{
+			return;
+		}
+		else
+		{
+			wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
+
+			if (wglSwapIntervalEXT)
+				wglSwapIntervalEXT(_enable);
+		}
 	}
 
 	void* WindowsWindow::GetNativeWindow() const

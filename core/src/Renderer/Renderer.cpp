@@ -24,6 +24,15 @@ namespace Beryllium
 		_array->Bind();
 		RenderCommand::DrawIndexed(_array);
 	}
+
+	void Renderer::Submit(const Beryllium::Renderable& _renderable)
+	{
+		_renderable.GetShader()->Bind();
+		_renderable.GetShader()->SetUniform("u_ViewProjection", s_sceneData->vpMatrix);
+
+		_renderable.GetVertexArray()->Bind();
+		RenderCommand::DrawIndexed(_renderable.GetVertexArray());
+	}
 	
 	void Renderer::Set(Renderer* _api)
 	{

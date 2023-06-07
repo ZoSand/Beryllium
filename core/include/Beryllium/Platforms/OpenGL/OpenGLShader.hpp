@@ -34,8 +34,8 @@ namespace Beryllium
 
 			void main()
 			{
-				o_Color = vec4(0.8, 0.2, 0.3, 0.5);
-				o_Color = remap(vec4(t_Position, 0.5), vec2(-1, 1), vec2(0, 1));
+				o_Color = vec4(0.9, 0.9, 0.9, 0.5);
+				//o_Color = remap(vec4(t_Position, 0.5), vec2(-1, 1), vec2(0, 1));
 			}
 			)";
 		};

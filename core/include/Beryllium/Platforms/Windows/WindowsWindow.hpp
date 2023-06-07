@@ -27,6 +27,9 @@ namespace Beryllium
 		virtual void OnUpdate() override;
 		virtual bool IsOpen() const override;
 		virtual void Close() override;
+
+		void SetVSync(bool _enable) override;
+
 	private:
 		::HWND m_handle = nullptr;
 

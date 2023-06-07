@@ -33,6 +33,9 @@
 #	include <Beryllium/Renderer/VertexArray.hpp>
 #	include <Beryllium/Renderer/VertexBuffer.hpp>
 #	include <Beryllium/Renderer/OrthographicCamera.hpp>
+#	include <Beryllium/Renderer/Renderable.hpp>
+
+#	include <Beryllium/Renderer/Sprite.hpp>
 
 // RENDERERS:OPENGL
 #	include <Beryllium/Platforms/OpenGL/OpenGLRenderer.hpp>

@@ -11,6 +11,7 @@
 #	include <Beryllium/Renderer/VertexBuffer.hpp>
 #	include <Beryllium/Renderer/VertexArray.hpp>
 #	include <Beryllium/Renderer/OrthographicCamera.hpp>
+#	include <Beryllium/Renderer/Renderable.hpp>
 
 #	include <memory>
 
@@ -23,6 +24,7 @@ namespace Beryllium
 		static void BeginScene(const OrthographicCamera& _cam);
 		static void EndScene();
 		static void Submit(const std::shared_ptr<VertexArray>& _array, const std::shared_ptr<Shader>& _shader);
+		static void Submit(const Beryllium::Renderable& _renderable);
 
 		//misc
 		static void Set(Renderer* _api);
