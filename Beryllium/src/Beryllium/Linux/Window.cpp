@@ -7,7 +7,6 @@
 
 #include <Beryllium/Linux/Window.hpp>
 #include <Beryllium/Common/Application.hpp>
-#include <iostream>
 
 namespace Be::Platform {
     Window::Window() noexcept
@@ -44,6 +43,7 @@ namespace Be::Platform {
         }
 
         XSetWMProtocols(m_display, m_window, &m_atomWmDeleteMessage, 1);
+        SetTitle(Application::GetApplicationDefaultName());
     }
 
     void Window::Destroy() {
@@ -94,11 +94,26 @@ namespace Be::Platform {
     }
 
     void Window::SetTitle(const std::string &_title) {
-
+        if (m_display == nullptr || m_window == None){
+            return;
+        }
+        XStoreName(m_display, m_window, _title.c_str());
+        XFlush(m_display);
     }
 
     std::string Window::GetTitle() const {
-        return std::string{""};
+        std::string title;
+        char* windowName = nullptr;
+        if (m_display == nullptr || m_window == None){
+            return title;
+        }
+        XFetchName(m_display, m_window, &windowName);
+        if (windowName != nullptr)
+        {
+            title = windowName;
+            XFree(windowName);
+        }
+        return title;
     }
 
     void Window::Open(bool _open) {
@@ -125,18 +140,40 @@ namespace Be::Platform {
     }
 
     void Window::SetSize(std::pair<int, int> _size) {
-
+        if (m_display == nullptr || m_window == None){
+            return;
+        }
+        XResizeWindow(m_display, m_window, _size.first, _size.second);
+        XFlush(m_display);
     }
 
     std::pair<int, int> Window::GetSize() const {
-        return std::make_pair<int, int>(0, 0);
+        std::pair<int, int> size;
+        if (m_display == nullptr || m_window == None){
+            return size;
+        }
+        XWindowAttributes wndAttribs;
+        XGetWindowAttributes(m_display, m_window, &wndAttribs);
+        size = std::make_pair(wndAttribs.width, wndAttribs.height);
+        return size;
     }
 
     void Window::SetPosition(std::pair<int, int> _position) {
-
+        if (m_display == nullptr || m_window == None) {
+            return;
+        }
+        XMoveWindow(m_display, m_window, _position.first, _position.second);
+        XFlush(m_display);
     }
 
     std::pair<int, int> Window::GetPosition() const {
-        return std::make_pair<int, int>(0, 0);
+        std::pair<int, int> position;
+        if (m_display == nullptr || m_window == None){
+            return position;
+        }
+        XWindowAttributes wndAttribs;
+        XGetWindowAttributes(m_display, m_window, &wndAttribs);
+        position = std::make_pair(wndAttribs.x, wndAttribs.y);
+        return position;
     }
 }
