@@ -1,0 +1,9 @@
+# cache folders
+.vs/
+.idea/
+
+# Build files
+Build/
+
+# cmake generated
+cmake-build-*/
