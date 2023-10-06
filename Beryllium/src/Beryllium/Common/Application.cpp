@@ -11,6 +11,11 @@
 
 #if defined(BERYLLIUM_PLATFORM_WINDOWS)
 #   include <shlwapi.h>
+#elif defined(BERYLLIUM_PLATFORM_LINUX)
+#   include <unistd.h>
+#   include <libgen.h>
+#   include <cstring>
+
 #endif
 
 namespace Be {
@@ -49,6 +54,18 @@ namespace Be {
             PathStripPathA(buffer);
             PathRemoveExtensionA(buffer);
             defaultName = buffer;
+        }
+#elif defined(BERYLLIUM_PLATFORM_LINUX)
+        char buffer[4096];
+        ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+        if (len != -1) {
+            buffer[len] = '\0';
+            const char* exeName = basename(buffer);
+            char* extPos = const_cast<char*>(strrchr(exeName, '.'));
+            if (extPos != nullptr) {
+                *extPos = '\0';
+            }
+            defaultName = exeName;
         }
 #endif
         return defaultName;
