@@ -1,4 +1,4 @@
-#include <Beryllium/Common/Main.hpp>
+#include <Beryllium/Main.hpp>
 #include <iostream>
 
 BE_USE_APPLICATION(Be::Application, {

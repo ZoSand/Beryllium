@@ -8,8 +8,6 @@ project(BerylliumTests VERSION 0.1.0)
 # CXX Standard
 set(CMAKE_CXX_STANDARD 23)
 
-# Options
-
 # target include directories
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -26,7 +24,7 @@ file(GLOB_RECURSE TESTS_HEADERS ${TESTS_INCLUDE_DIR}/*.hpp)
 add_executable(BerylliumTests ${TESTS_SOURCES} ${TESTS_HEADERS})
 
 # Link
-target_link_libraries(BerylliumTests Beryllium::Core)
+target_link_libraries(BerylliumTests Beryllium::Core Beryllium::Platform Beryllium::Application)
 
 # Definitions
 
