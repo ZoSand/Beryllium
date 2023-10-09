@@ -9,8 +9,8 @@ project(BerylliumTests VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 23)
 
 # target include directories
-set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(INCLUDE_DIR include)
+set(SOURCES_DIR src)
 include_directories(${INCLUDE_DIR})
 
 set(TESTS_INCLUDE_DIR ${INCLUDE_DIR}/Test)

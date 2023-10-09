@@ -5,8 +5,8 @@ project(BerylliumApp VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 23)
 
 # directories locations
-set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(INCLUDE_DIR include)
+set(SOURCES_DIR src)
 
 # Sources and Headers
 file(GLOB_RECURSE BE_APP_HEADERS ${INCLUDE_DIR}/*.hpp)
@@ -29,7 +29,7 @@ target_link_libraries(${PROJECT_NAME} Beryllium::Core Beryllium::Platform)
 if (BERYLLIUM_COPY_HEADERS)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/include
+            include
             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/../include
     )
 endif ()

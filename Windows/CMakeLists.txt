@@ -1,29 +1,16 @@
 cmake_minimum_required(VERSION 3.24)
-project(BerylliumUnix VERSION 0.1.0)
+project(BerylliumWindows VERSION 0.1.0)
 
-if (UNIX)
+if (WIN32)
     # CXX Standard
     set(CMAKE_CXX_STANDARD 23)
 
     # directories locations
-    set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    set(SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-    find_package(X11 REQUIRED)
-
-    if (X11_FOUND)
-        message(STATUS "X11_FOUND       = ${X11_FOUND}")
-        message(STATUS "X11_INCLUDE_DIR = ${X11_INCLUDE_DIR}")
-        message(STATUS "X11_LIBRARIES   = ${X11_LIBRARIES}")
-    else()
-        message(FATAL_ERROR "X11_FOUND       = ${X11_FOUND}")
-        message(FATAL_ERROR "X11_INCLUDE_DIR = ${X11_INCLUDE_DIR}")
-        message(FATAL_ERROR "X11_LIBRARIES   = ${X11_LIBRARIES}")
-        message(FATAL_ERROR "X11 required to run on UNIX systems")
-    endif ()
+    set(INCLUDE_DIR include)
+    set(SOURCES_DIR src)
 
     # system libraries
-    set(BE_PLATFORM_SYSTEM_LIBRARIES ${X11_LIBRARIES})
+    set(BE_PLATFORM_SYSTEM_LIBRARIES Shlwapi.lib)
 
     # Sources and Headers
     file(GLOB_RECURSE BE_PLATFORM_HEADERS ${INCLUDE_DIR}/*.hpp)
@@ -36,7 +23,6 @@ if (UNIX)
 
     # Include directories
     target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIR})
-    target_include_directories(${PROJECT_NAME} PRIVATE ${X11_INCLUDE_DIR})
 
     # Export symbols
     target_compile_definitions(${PROJECT_NAME} PRIVATE BE_PLATFORM_EXPORT_SYMBOLS)
@@ -48,7 +34,7 @@ if (UNIX)
     if (BERYLLIUM_COPY_HEADERS)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/include
+                include
                 ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/../include
         )
     endif ()

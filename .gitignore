@@ -1,6 +1,6 @@
 # cache folders
 .vs/
-.idea/
+../.idea/
 
 # Build files
 Build/
