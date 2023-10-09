@@ -34,7 +34,7 @@ if (WIN32)
     if (BERYLLIUM_COPY_HEADERS)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_directory
-                include
+                ${CMAKE_CURRENT_SOURCE_DIR}/include
                 ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/../include
         )
     endif ()
