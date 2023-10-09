@@ -16,7 +16,7 @@
 #       define BE_PLATFORM_API_EXPORT __declspec(dllexport)
 #       define BE_PLATFORM_API_IMPORT __declspec(dllimport)
 #       define BE_PLATFORM_API_LOCAL
-#   elif defined(BE_PLATFORM_LINUX)
+#   elif defined(BE_PLATFORM_UNIX)
 #       if defined(__GNUC__) && __GNUC__ >= 4
 #           define BE_PLATFORM_API_EXPORT __attribute__((visibility("default")))
 #           define BE_PLATFORM_API_IMPORT __attribute__((visibility("default")))

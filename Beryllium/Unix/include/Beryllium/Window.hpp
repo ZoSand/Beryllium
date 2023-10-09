@@ -19,8 +19,9 @@
 
 namespace Be::Implementation
 {
-class BE_PLATFORM_API_PUBLIC Window : public Be::Contracts::Window {
-    public:        Window() noexcept;
+    class BE_PLATFORM_API_PUBLIC Window : public Be::Contracts::Window {
+    public:
+    Window() noexcept;
 
     ~Window() override;
 

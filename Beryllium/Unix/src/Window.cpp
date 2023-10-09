@@ -11,13 +11,13 @@
 #include <libgen.h>
 #include <cstring>
 
-namespace Be::Platform {
+namespace Be::Implementation {
     Window::Window() noexcept
-            : Contracts::Window(), m_display(nullptr), m_screen(nullptr), m_window(None), m_atomWmDeleteMessage(None), m_init(false), m_shouldClose(false){
+            : Be::Contracts::Window(), m_display(nullptr), m_screen(nullptr), m_window(None), m_atomWmDeleteMessage(None), m_init(false), m_shouldClose(false){
     };
 
     Window::~Window() {
-        Platform::Window::Destroy();
+        Be::Implementation::Window::Destroy();
     }
 
     void Window::Create() {
@@ -46,7 +46,7 @@ namespace Be::Platform {
         }
 
         XSetWMProtocols(m_display, m_window, &m_atomWmDeleteMessage, 1);
-        SetTitle(Application::GetApplicationDefaultName());
+        SetTitle(GetApplicationDefaultTitle());
     }
 
     void Window::Destroy() {
